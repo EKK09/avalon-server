@@ -3,7 +3,8 @@ module.exports = {
     script: './dist/index.js',
     watch: './dist',
     node_args: '-r dotenv/config',
-    watch_delay: 1000,
+    watch_delay: 5000,
+    exp_backoff_restart_delay: 5000,
   }],
   deploy: {
     production: {
