@@ -19,11 +19,17 @@ app.get('/user', async (request: Request, response: Response) => {
 });
 
 app.post('/room', async (request: Request, response: Response) => {
-  const { body } = request;
-  const roomId = body['room-id'];
-  console.log(`api roomId":${roomId}`);
-  GameRoomService.createGameRoom(roomId);
-  response.json(roomId);
+  try {
+    const playerName = request.body.player_name;
+    if (!playerName || playerName.trim() === '') {
+      response.status(400).json({ error_message: '參數錯誤' });
+      return;
+    }
+    const roomId = await GameRoomService.createGameRoom(playerName);
+    response.json({ room_id: roomId });
+  } catch (error) {
+    response.status(500).json({ error_message: '內部錯誤' });
+  }
 });
 
 const server = app.listen(port, () => {

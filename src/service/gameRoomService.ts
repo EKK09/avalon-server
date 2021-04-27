@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { IncomingMessage } from 'http';
 import * as net from 'net';
+import GameRoomModel from '../model/gameRoomModel';
 
 interface NamedClient extends WebSocket {
   player: string;
@@ -78,12 +79,14 @@ class GameRoomService {
     }
   }
 
-  static createGameRoom(roomId: string) {
+  static async createGameRoom(playerName: string): Promise<number> {
+    const roomId = await GameRoomModel.create(playerName);
     const webSocketServer = new WebSocket.Server({ noServer: true });
-    webSocketServer.path = roomId;
+    webSocketServer.path = roomId.toString();
     webSocketServer.on('connection', GameRoomService.handleConnection);
     GameRoomService.GameRoomServiceList.push(webSocketServer);
     console.log(`createGameRoom ${roomId} total Room: ${GameRoomService.GameRoomServiceList.length}`);
+    return roomId;
   }
 }
 
