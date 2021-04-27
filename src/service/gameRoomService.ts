@@ -2,12 +2,19 @@ import WebSocket from 'ws';
 import { IncomingMessage } from 'http';
 import * as net from 'net';
 
+interface NamedClient extends WebSocket {
+  player: string;
+}
 class GameRoomService {
   static GameRoomServiceList: WebSocket.Server[] = []
 
-  static handleConnection(this:WebSocket.Server, webSocket: WebSocket) {
-    console.log(`connection clientCount:${this.clients.size}`);
-    webSocket.on('message', GameRoomService.getClientMessageHandler(this));
+  static handleConnection(this:WebSocket.Server, webSocket: NamedClient) {
+    console.log(`connection clientCount:${this.clients.size} player:${webSocket.player}`);
+    webSocket.on('message', (data: WebSocket.Data) => {
+      console.log(`message from WebSocket Client: ${data}`);
+      GameRoomService.broadcast(this.clients, `${webSocket.player}:${data}`);
+    });
+    GameRoomService.broadcast(this.clients, `welcome ${webSocket.player}`);
   }
 
   static broadcast(clients: Set<WebSocket>, data: any) {
@@ -19,10 +26,9 @@ class GameRoomService {
 
   static getClientMessageHandler(webSocketServer:WebSocket.Server) {
     const server = webSocketServer;
-    return function handleClientMessage(this:WebSocket, data: WebSocket.Data) {
-      // TODO: 處理客端訊息
+    return function handleClientMessage(this:NamedClient, data: WebSocket.Data) {
       console.log(`message from WebSocket Client: ${data}`);
-      GameRoomService.broadcast(server.clients, `broadcast test:${data}`);
+      GameRoomService.broadcast(server.clients, `${this.player}:${data}`);
     };
   }
 
@@ -40,18 +46,36 @@ class GameRoomService {
   }
 
   static handleUpgrade(request: IncomingMessage, socket: net.Socket, head: Buffer) {
-    const path = request.url || '';
+    try {
+      if (!request.url) {
+        throw new Error();
+      }
+      const pathRex = /^\/(\w+)\/(\w+)/;
+      const matcher = request.url.match(pathRex);
 
-    const roomId = path.replace('/', '');
-    const webSocketServer = GameRoomService.getRoomById(roomId);
-    if (webSocketServer === null) {
-      console.log('webSocketServer null');
+      if (matcher === null) {
+        throw new Error();
+      }
+      const [, roomId, player] = matcher;
+      console.log({ roomId, player });
+      const webSocketServer = GameRoomService.getRoomById(roomId);
+
+      if (webSocketServer === null) {
+        console.log('webSocketServer null');
+        socket.destroy();
+        return;
+      }
+
+      webSocketServer.handleUpgrade(request, socket, head, (client: WebSocket) => {
+        Object.defineProperty(client, 'player', {
+          get() { return player; },
+        });
+        webSocketServer.emit('connection', client, request);
+      });
+    } catch (error) {
+      console.log(error);
       socket.destroy();
-      return;
     }
-    webSocketServer.handleUpgrade(request, socket, head, (client: WebSocket) => {
-      webSocketServer.emit('connection', client, request);
-    });
   }
 
   static createGameRoom(roomId: string) {
