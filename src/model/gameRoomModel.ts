@@ -11,6 +11,11 @@ class GameRoomModel {
 
   static redis = new Redis(GameRoomModel.DB_PORT, { enableAutoPipelining: true });
 
+  static async isPlayerExist(roomId: string, playerName: string): Promise<boolean> {
+    const booleanResponse = await GameRoomModel.redis.sismember(`game_room:${roomId}`, playerName);
+    return booleanResponse === 1;
+  }
+
   static async create(playerName: string): Promise<number> {
     const roomId = await GameRoomModel.redis.incr('next_room_id');
     await GameRoomModel.redis.sadd(`game_room:${roomId}`, [playerName]);
