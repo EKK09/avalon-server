@@ -18,3 +18,15 @@ export const getRandomSubArray = (array: any[], length:number): any[] => {
 
   return subArray;
 };
+
+export const makeRandomArray = (array: string[]): string[] => {
+  const randomArray: string[] = [];
+
+  while (array.length > 0) {
+    const randomIndex = getRandomNumber(array.length);
+    const item = array.splice(randomIndex, 1)[0];
+    randomArray.push(item);
+  }
+
+  return randomArray;
+};

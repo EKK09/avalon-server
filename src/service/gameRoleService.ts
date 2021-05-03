@@ -1,6 +1,14 @@
-import { getRandomSubArray } from '../common/randomHelper';
+import { getRandomSubArray, makeRandomArray } from '../common/randomHelper';
 
 class GameRoleService {
+  static getGameRoleList(playerCount: number) {
+    const goods = GameRoleService.getGoodList(playerCount);
+    const evils = GameRoleService.getEvilList(playerCount);
+    const roles = [...goods, ...evils];
+    const randomArray = makeRandomArray(roles);
+    return randomArray;
+  }
+
   static getGoodList(playerCount: number): string[] {
     const selectableGoods: string[] = ['Percival', 'good', 'good', 'good', 'good', 'good'];
     const selectedGoods:string[] = ['Merlin'];
