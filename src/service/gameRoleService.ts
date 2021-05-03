@@ -2,9 +2,8 @@ import { getRandomSubArray } from '../common/randomHelper';
 
 class GameRoleService {
   static getGoodList(playerCount: number): string[] {
-    const merlin = 'Merlin';
     const selectableGoods: string[] = ['Percival', 'good', 'good', 'good', 'good', 'good'];
-    const selectedGoods:string[] = [];
+    const selectedGoods:string[] = ['Merlin'];
     let selectedLength: number = 2;
     if (playerCount === 5) {
       selectedLength = 2;
@@ -17,14 +16,12 @@ class GameRoleService {
     }
     const randomGoods = getRandomSubArray(selectableGoods, selectedLength);
     selectedGoods.concat(randomGoods);
-    selectedGoods.push(merlin);
     return selectedGoods;
   }
 
   static getEvilList(playerCount: number) {
-    const evils = 'assassin';
-    const selectableGoods: string[] = ['Mordred', 'Oberon', 'Morgana', 'good', 'good', 'good'];
-    const selectedGoods:string[] = [];
+    const selectableEvils: string[] = ['Mordred', 'Oberon', 'Morgana', 'evil', 'evil', 'evil'];
+    const selectedEvils:string[] = ['Assassin'];
     let selectedLength: number = 2;
     if (playerCount === 5 || playerCount === 6) {
       selectedLength = 2;
@@ -33,10 +30,9 @@ class GameRoleService {
     } else if (playerCount === 10) {
       selectedLength = 4;
     }
-    const randomGoods = getRandomSubArray(selectableGoods, selectedLength);
-    selectedGoods.concat(randomGoods);
-    selectedGoods.push(evils);
-    return selectedGoods;
+    const randomEvils = getRandomSubArray(selectableEvils, selectedLength);
+    selectedEvils.concat(randomEvils);
+    return selectedEvils;
   }
 }
 
