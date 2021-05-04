@@ -23,8 +23,7 @@ class GameRoleService {
       selectedLength = 5;
     }
     const randomGoods = getRandomSubArray(selectableGoods, selectedLength);
-    selectedGoods.concat(randomGoods);
-    return selectedGoods;
+    return selectedGoods.concat(randomGoods);
   }
 
   static getEvilList(playerCount: number) {
@@ -39,8 +38,7 @@ class GameRoleService {
       selectedLength = 4;
     }
     const randomEvils = getRandomSubArray(selectableEvils, selectedLength);
-    selectedEvils.concat(randomEvils);
-    return selectedEvils;
+    return selectedEvils.concat(randomEvils);
   }
 }
 

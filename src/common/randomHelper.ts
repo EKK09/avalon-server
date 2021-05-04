@@ -12,7 +12,7 @@ export const getRandomSubArray = (array: any[], length:number): any[] => {
   while (subArray.length < length) {
     const selectedIndex = getRandomNumber(array.length);
     subArray.push(
-      array.splice(selectedIndex, 1),
+      array.splice(selectedIndex, 1)[0],
     );
   }
 
