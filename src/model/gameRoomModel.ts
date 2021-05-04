@@ -34,6 +34,20 @@ class GameRoomModel {
     return role;
   }
 
+  static async incrementGameStep(roomId: string): Promise<number> {
+    const step = await GameRoomModel.redis.incr(`game_step:${roomId}`);
+    return step;
+  }
+
+  static async getGameStep(roomId: string): Promise<number> {
+    const res = await GameRoomModel.redis.get(`game_step:${roomId}`);
+
+    if (res === null) {
+      return 0;
+    }
+    return Number(res);
+  }
+
   static async create(playerName: string): Promise<number> {
     const roomId = await GameRoomModel.redis.incr('next_room_id');
     await GameRoomModel.redis.sadd(`game_room:${roomId}`, [playerName]);
