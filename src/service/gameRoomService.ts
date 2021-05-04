@@ -16,13 +16,23 @@ class GameRoomService {
       console.log(`message from WebSocket Client: ${data}`);
       GameRoomService.broadcast(this.clients, `${webSocket.player}:${data}`);
     });
-    GameRoomService.broadcast(this.clients, `welcome ${webSocket.player}`);
+    // GameRoomService.broadcast(this.clients, `welcome ${webSocket.player}`);
   }
 
   static broadcast(clients: Set<WebSocket>, data: any) {
     console.log(`broadcast:${data}`);
     Array.from(clients).forEach((webSocket: WebSocket) => {
       webSocket.send(data);
+    });
+  }
+
+  static async sendRole(room: WebSocket.Server) {
+    console.log('sendRole');
+    const roomId = room.path;
+    const gameRole = await GameRoomModel.getGameRole(roomId);
+    Array.from(room.clients).forEach((client: any) => {
+      const role = gameRole[client.player];
+      client.send(`you are ${role}`);
     });
   }
 
@@ -60,6 +70,7 @@ class GameRoomService {
     });
     await GameRoomModel.createGameRole(roomId, playerRolePayload);
     GameRoomService.broadcast(room.clients, 'game start');
+    GameRoomService.sendRole(room);
     return true;
   }
 

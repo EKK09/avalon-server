@@ -29,6 +29,11 @@ class GameRoomModel {
     await GameRoomModel.redis.hmset(`game_role:${roomId}`, payload);
   }
 
+  static async getGameRole(roomId: string):Promise<PlayerRolePayload> {
+    const role = await GameRoomModel.redis.hgetall(`game_role:${roomId}`);
+    return role;
+  }
+
   static async create(playerName: string): Promise<number> {
     const roomId = await GameRoomModel.redis.incr('next_room_id');
     await GameRoomModel.redis.sadd(`game_room:${roomId}`, [playerName]);
