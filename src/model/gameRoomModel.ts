@@ -6,6 +6,10 @@ export interface GameRoomReturn {
   data: string | null;
 }
 
+export interface PlayerRolePayload {
+  [key: string]: string;
+}
+
 class GameRoomModel {
   static DB_PORT = process.env.REDIS_DB_PORT;
 
@@ -14,6 +18,15 @@ class GameRoomModel {
   static async isPlayerExist(roomId: string, playerName: string): Promise<boolean> {
     const booleanResponse = await GameRoomModel.redis.sismember(`game_room:${roomId}`, playerName);
     return booleanResponse === 1;
+  }
+
+  static async addPlayersToRoom(roomId: string, players: string[]): Promise<boolean> {
+    const addedCount = await GameRoomModel.redis.sadd(`game_room:${roomId}`, players);
+    return addedCount === players.length;
+  }
+
+  static async createGameRole(roomId: string, payload: PlayerRolePayload):Promise<void> {
+    await GameRoomModel.redis.hmset(`game_role:${roomId}`, payload);
   }
 
   static async create(playerName: string): Promise<number> {
