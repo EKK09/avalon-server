@@ -59,6 +59,7 @@ app.post('/start', async (request: Request, response: Response) => {
     }
 
     // TODO: 開始遊戲
+    await GameRoomService.startGame(roomId);
 
     response.status(204).send();
   } catch (error) {

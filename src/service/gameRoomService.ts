@@ -1,7 +1,8 @@
 import WebSocket from 'ws';
 import { IncomingMessage } from 'http';
 import * as net from 'net';
-import GameRoomModel from '../model/gameRoomModel';
+import GameRoomModel, { PlayerRolePayload } from '../model/gameRoomModel';
+import GameRoleService from './gameRoleService';
 
 interface NamedClient extends WebSocket {
   player: string;
@@ -44,6 +45,22 @@ class GameRoomService {
     }
 
     return null;
+  }
+
+  static async startGame(roomId: string): Promise<boolean> {
+    const room = GameRoomService.getRoomById(roomId);
+    if (room === null) {
+      return false;
+    }
+    const players = Array.from(room.clients).map((client: any) => client.player);
+    const roles = GameRoleService.getGameRoleList(players.length);
+    const playerRolePayload: PlayerRolePayload = {};
+    players.forEach((player, index) => {
+      playerRolePayload[player] = roles[index];
+    });
+    await GameRoomModel.createGameRole(roomId, playerRolePayload);
+    GameRoomService.broadcast(room.clients, 'game start');
+    return true;
   }
 
   static handleUpgrade(request: IncomingMessage, socket: net.Socket, head: Buffer) {
