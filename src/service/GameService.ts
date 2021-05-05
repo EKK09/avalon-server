@@ -30,6 +30,8 @@ class GameService {
 
   private role: GameRole = {};
 
+  private step: number = 0;
+
   public get playerCount(): number {
     return Object.keys(this.player).length;
   }
@@ -55,6 +57,7 @@ class GameService {
 
     if (action.type === GameActionType.START && this.isHost(client)) {
       await this.startGame();
+      await this.incrementGameStep();
       return;
     }
 
@@ -114,6 +117,20 @@ class GameService {
   private async startGame(): Promise<void> {
     await this.setGameRole();
     this.declareGameRole();
+  }
+
+  private async incrementGameStep(): Promise<void> {
+    const step = await GameRoomModel.incrementGameStep(this.roomId.toString());
+    this.step = step;
+    this.handleStep();
+  }
+
+  private async handleStep() {
+    if (this.step === 1) {
+    // TODO: handle step
+
+    }
+    // TODO: handle step
   }
 
   async createRoom(): Promise<number> {
