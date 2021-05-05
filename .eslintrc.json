@@ -24,6 +24,10 @@
     ],
     "rules": {
         "import/extensions": "off",
-        "max-len": ["error", { "code": 150 }]
+        "max-len": ["error", { "code": 150 }],
+        "no-shadow": "off",
+        "@typescript-eslint/no-shadow": ["error"],
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": ["error"]
     }
 }
