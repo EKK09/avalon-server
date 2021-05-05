@@ -3,6 +3,7 @@ import cors from 'cors';
 import GameRoomService from './service/gameRoomService';
 import UserModel from './model/userMode';
 import GameRoomModel from './model/gameRoomModel';
+import WebSocketService from './service/WebSocketService';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -26,7 +27,7 @@ app.post('/room', async (request: Request, response: Response) => {
       response.status(400).json({ error_message: '參數錯誤' });
       return;
     }
-    const roomId = await GameRoomService.createGameRoom(playerName);
+    const roomId = await WebSocketService.createGameService(playerName);
     response.json({ room_id: roomId });
   } catch (error) {
     response.status(500).json({ error_message: '內部錯誤' });
@@ -71,6 +72,6 @@ const server = app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
   server.on('upgrade', (request, socket, head) => {
     console.log('upgrade');
-    GameRoomService.handleUpgrade(request, socket, head);
+    WebSocketService.handleGameConnection(request, socket, head);
   });
 });
