@@ -1,7 +1,18 @@
 import { getRandomSubArray, makeRandomArray } from '../common/randomHelper';
 
+export enum GameRoleName {
+  MERLIN = 'Merlin',
+  PERCIVAL = 'Percival',
+  ASSASSIN = 'Assassin',
+  MORGANA = 'Morgana',
+  OBERON = 'Oberon',
+  MORDRED = 'Mordred',
+  GOOD = 'good',
+  EVIL = 'evil',
+  UNSET = ''
+}
 class GameRoleService {
-  static getGameRoleList(playerCount: number) {
+  static getGameRoleList(playerCount: number): GameRoleName[] {
     const goods = GameRoleService.getGoodList(playerCount);
     const evils = GameRoleService.getEvilList(playerCount);
     const roles = [...goods, ...evils];
@@ -10,8 +21,15 @@ class GameRoleService {
   }
 
   static getGoodList(playerCount: number): string[] {
-    const selectableGoods: string[] = ['Percival', 'good', 'good', 'good', 'good', 'good'];
-    const selectedGoods:string[] = ['Merlin'];
+    const selectableGoods: string[] = [
+      GameRoleName.PERCIVAL,
+      GameRoleName.GOOD,
+      GameRoleName.GOOD,
+      GameRoleName.GOOD,
+      GameRoleName.GOOD,
+      GameRoleName.GOOD,
+    ];
+    const selectedGoods:string[] = [GameRoleName.MERLIN];
     let selectedLength: number = 2;
     if (playerCount === 5) {
       selectedLength = 2;
@@ -27,8 +45,14 @@ class GameRoleService {
   }
 
   static getEvilList(playerCount: number) {
-    const selectableEvils: string[] = ['Mordred', 'Oberon', 'Morgana', 'evil', 'evil', 'evil'];
-    const selectedEvils:string[] = ['Assassin'];
+    const selectableEvils: string[] = [
+      GameRoleName.MORDRED,
+      GameRoleName.OBERON,
+      GameRoleName.MORGANA,
+      GameRoleName.EVIL,
+      GameRoleName.EVIL,
+      GameRoleName.EVIL];
+    const selectedEvils:string[] = [GameRoleName.ASSASSIN];
     let selectedLength: number = 2;
     if (playerCount === 5 || playerCount === 6) {
       selectedLength = 2;
@@ -39,6 +63,26 @@ class GameRoleService {
     }
     const randomEvils = getRandomSubArray(selectableEvils, selectedLength);
     return selectedEvils.concat(randomEvils);
+  }
+
+  static isRevealableEvil(role: GameRoleName) {
+    const RevealableEvils = [
+      GameRoleName.OBERON,
+      GameRoleName.MORGANA,
+      GameRoleName.ASSASSIN,
+      GameRoleName.EVIL,
+    ];
+    return RevealableEvils.includes(role);
+  }
+
+  static isKnowEachOtherEvil(role: GameRoleName) {
+    const evils = [
+      GameRoleName.MORDRED,
+      GameRoleName.MORGANA,
+      GameRoleName.EVIL,
+      GameRoleName.ASSASSIN,
+    ];
+    return evils.includes(role);
   }
 }
 
