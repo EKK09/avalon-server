@@ -53,13 +53,13 @@ class GameRoleService {
       GameRoleName.EVIL,
       GameRoleName.EVIL];
     const selectedEvils:string[] = [GameRoleName.ASSASSIN];
-    let selectedLength: number = 2;
+    let selectedLength: number = 1;
     if (playerCount === 5 || playerCount === 6) {
-      selectedLength = 2;
+      selectedLength = 1;
     } else if (playerCount === 7 || playerCount === 8 || playerCount === 9) {
-      selectedLength = 3;
+      selectedLength = 2;
     } else if (playerCount === 10) {
-      selectedLength = 4;
+      selectedLength = 3;
     }
     const randomEvils = getRandomSubArray(selectableEvils, selectedLength);
     return selectedEvils.concat(randomEvils);
