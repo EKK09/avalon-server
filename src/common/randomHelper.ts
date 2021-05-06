@@ -19,7 +19,7 @@ export const getRandomSubArray = (array: any[], length:number): any[] => {
   return subArray;
 };
 
-export const makeRandomArray = (array: string[]): string[] => {
+export const makeRandomArray = (array: any[]): any[] => {
   const randomArray: string[] = [];
 
   while (array.length > 0) {
