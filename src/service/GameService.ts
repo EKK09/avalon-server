@@ -1,22 +1,26 @@
 import WebSocket from 'ws';
 import GameRoomModel from '../model/gameRoomModel';
-import GameRoleService from './gameRoleService';
+import GameRoleService, { GameRoleName } from './gameRoleService';
 
 interface Player {
   [key: string]: WebSocket;
 }
 interface GameRole {
-  [key: string]: string;
+  [key: string]: GameRoleName;
 }
 
 enum GameActionType {
   NONE = '',
-  START = 'start'
+  START = 'start',
+  DECLARE_ROLE = 'declareRole',
+  REVEAL_EVIL = 'revealEvil',
+  REVEAL_MERLIN = 'revealMerlin',
+  REVEAL_EVIL_EACH = 'revealEvilEach',
 }
 
 interface GameAction {
   type: GameActionType;
-  payload: any;
+  payload?: any;
 }
 
 class GameService {
@@ -29,6 +33,18 @@ class GameService {
   public player: Player;
 
   private role: GameRole = {};
+
+  private MERLIN: string = '';
+
+  private PERCIVAL: string = '';
+
+  private MORGANA: string = '';
+
+  private ASSASSIN: string = '';
+
+  private OBERON: string = '';
+
+  private MORDRED: string = '';
 
   private step: number = 0;
 
@@ -127,8 +143,7 @@ class GameService {
 
   private async handleStep() {
     if (this.step === 1) {
-    // TODO: handle step
-
+      this.revealGameRole();
     }
     // TODO: handle step
   }
@@ -150,8 +165,84 @@ class GameService {
   private declareGameRole(): void {
     Object.keys(this.player).forEach((name) => {
       const role = this.role[name];
-      this.player[name].send(`you are ${role}`);
+      const client = this.player[name];
+      if (role === GameRoleName.MERLIN) {
+        this.MERLIN = name;
+      } else if (role === GameRoleName.PERCIVAL) {
+        this.PERCIVAL = name;
+      } else if (role === GameRoleName.OBERON) {
+        this.OBERON = name;
+      } else if (role === GameRoleName.MORDRED) {
+        this.MORDRED = name;
+      } else if (role === GameRoleName.MORGANA) {
+        this.MORGANA = name;
+      } else if (role === GameRoleName.ASSASSIN) {
+        this.ASSASSIN = name;
+      }
+      const action: GameAction = {
+        type: GameActionType.DECLARE_ROLE,
+        payload: role,
+      };
+      client.send(JSON.stringify(action));
     });
+  }
+
+  private revealGameRole(): void {
+    Object.keys(this.player).forEach((player) => {
+      const role = this.role[player];
+      const client = this.player[player];
+      if (role === GameRoleName.MERLIN) {
+        const revealableEvilPlayers = this.getRevealableEvilPlayers();
+        const action: GameAction = {
+          type: GameActionType.REVEAL_EVIL,
+          payload: revealableEvilPlayers,
+        };
+        client.send(JSON.stringify(action));
+      } else if (role === GameRoleName.PERCIVAL) {
+        const revealableMerlinPlayers = this.getRevealableMerlinPlayers();
+        const action: GameAction = {
+          type: GameActionType.REVEAL_MERLIN,
+          payload: revealableMerlinPlayers,
+        };
+        client.send(JSON.stringify(action));
+      } else if (GameRoleService.isKnowEachOtherEvil(role)) {
+        const knowEachOtherEvilPlayers = this.getKnowEachOtherEvilPlayers();
+        const action: GameAction = {
+          type: GameActionType.REVEAL_EVIL_EACH,
+          payload: knowEachOtherEvilPlayers,
+        };
+        client.send(JSON.stringify(action));
+      }
+    });
+  }
+
+  private getRevealableEvilPlayers(): string[] {
+    const players: string[] = [];
+    Object.keys(this.role).forEach((player) => {
+      if (GameRoleService.isRevealableEvil(this.role[player])) {
+        players.push(player);
+      }
+    });
+
+    return players;
+  }
+
+  private getRevealableMerlinPlayers(): string[] {
+    const players: string[] = [this.MERLIN];
+    if (this.MORGANA !== '') {
+      players.push(this.MORGANA);
+    }
+    return players;
+  }
+
+  private getKnowEachOtherEvilPlayers(): string[] {
+    const players: string[] = [];
+    Object.keys(this.role).forEach((player) => {
+      if (GameRoleService.isKnowEachOtherEvil(this.role[player])) {
+        players.push(player);
+      }
+    });
+    return players;
   }
 }
 
