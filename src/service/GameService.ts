@@ -18,7 +18,9 @@ enum GameActionType {
   REVEAL_EVIL_EACH = 'revealEvilEach',
   ASSIGN_LEADER = 'assignLeader',
   ASSIGN_TEAM = 'assignTeam',
-  ASSIGN_TASK = 'assignTask'
+  ASSIGN_TASK = 'assignTask',
+  VOTE = 'vote',
+  DECLARE_TASK_RESULT = 'declareTaskResult'
 }
 
 interface GameAction {
@@ -55,12 +57,34 @@ class GameService {
 
   private teamMemberList: string[] = [];
 
+  private voteResultList: boolean[] = [];
+
   public get playerCount(): number {
     return Object.keys(this.player).length;
   }
 
   public get leader(): string {
     return Object.keys(this.player)[this.round - 1];
+  }
+
+  private get isVoteFinished(): boolean {
+    return this.teamMemberList.length === this.voteResultList.length;
+  }
+
+  private get taskResult(): boolean {
+    let failCount = 0;
+
+    this.voteResultList.forEach((result) => {
+      if (result === false) {
+        failCount += 1;
+      }
+    });
+
+    if (this.round === 4 && failCount > 1) {
+      return false;
+    }
+
+    return failCount > 0;
   }
 
   constructor(host: string) {
@@ -86,9 +110,18 @@ class GameService {
       await this.startGame();
       await this.incrementGameStep();
       return;
-    } if (action.type === GameActionType.ASSIGN_TEAM && this.isLeader(client) && action.payload.length > 0) {
+    }
+
+    if (action.type === GameActionType.ASSIGN_TEAM && this.isLeader(client) && action.payload.length > 0) {
       this.teamMemberList = action.payload;
       await this.incrementGameStep();
+      return;
+    }
+
+    if (action.type === GameActionType.VOTE && this.isTeamMember(client) && action.payload !== undefined) {
+      this.voteResultList.push(Boolean(action.payload));
+      await this.handleVote();
+      return;
     }
 
     this.broadcast(`${this.getPlayerByWebSocket(client)}:${message}`);
@@ -172,6 +205,8 @@ class GameService {
       this.AssignLeader();
     } else if (this.step === 3) {
       this.assignTask();
+    } else if (this.step === 4) {
+      this.declareTaskResult();
     }
     // TODO: handle step
   }
@@ -316,6 +351,22 @@ class GameService {
     this.teamMemberList.forEach((player) => {
       this.player[player].send(JSON.stringify(action));
     });
+  }
+
+  async handleVote(): Promise<void> {
+    if (this.isVoteFinished) {
+      await this.incrementGameStep();
+    }
+  }
+
+  declareTaskResult(): void {
+    const action: GameAction = {
+      type: GameActionType.DECLARE_TASK_RESULT,
+      payload: this.taskResult,
+    };
+
+    this.broadcast(JSON.stringify(action));
+    this.incrementGameStep();
   }
 }
 
