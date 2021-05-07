@@ -16,6 +16,7 @@ enum GameActionType {
   REVEAL_EVIL = 'revealEvil',
   REVEAL_MERLIN = 'revealMerlin',
   REVEAL_EVIL_EACH = 'revealEvilEach',
+  ASSIGN_LEADER = 'assignLeader',
 }
 
 interface GameAction {
@@ -48,8 +49,14 @@ class GameService {
 
   private step: number = 0;
 
+  private round: number = 0;
+
   public get playerCount(): number {
     return Object.keys(this.player).length;
+  }
+
+  public get leader(): string {
+    return Object.keys(this.player)[this.round - 1];
   }
 
   constructor(host: string) {
@@ -71,7 +78,7 @@ class GameService {
   private async handleMessage(message: string, client: WebSocket): Promise<void> {
     const action: GameAction = GameService.getActionFromMessage(message);
 
-    if (action.type === GameActionType.START && this.isHost(client)) {
+    if (action.type === GameActionType.START && this.isHost(client) && this.round === 0) {
       await this.startGame();
       await this.incrementGameStep();
       return;
@@ -133,6 +140,7 @@ class GameService {
   private async startGame(): Promise<void> {
     await this.setGameRole();
     this.declareGameRole();
+    this.round = 1;
   }
 
   private async incrementGameStep(): Promise<void> {
@@ -144,6 +152,9 @@ class GameService {
   private async handleStep() {
     if (this.step === 1) {
       this.revealGameRole();
+      this.incrementGameStep();
+    } else if (this.step === 2) {
+      this.AssignLeader();
     }
     // TODO: handle step
   }
@@ -243,6 +254,42 @@ class GameService {
       }
     });
     return players;
+  }
+
+  private AssignLeader(): void {
+    const teamSize = this.getTeamSize();
+    const action: GameAction = {
+      type: GameActionType.ASSIGN_LEADER,
+      payload: teamSize,
+    };
+    this.player[this.leader].send(JSON.stringify(action));
+  }
+
+  private getTeamSize(): number {
+    if (this.round === 1) {
+      return this.playerCount < 8 ? 2 : 3;
+    } if (this.round === 2) {
+      return this.playerCount < 8 ? 3 : 4;
+    } if (this.round === 3 && this.playerCount === 5) {
+      return 2;
+    } if (this.round === 3 && this.playerCount === 7) {
+      return 3;
+    } if (this.round === 3) {
+      return 4;
+    } if (this.round === 4 && (this.playerCount === 5 || this.playerCount === 6)) {
+      return 3;
+    } if (this.round === 4 && this.playerCount === 7) {
+      return 4;
+    } if (this.round === 4) {
+      return 5;
+    } if (this.round === 5 && this.playerCount === 5) {
+      return 3;
+    } if (this.round === 5 && (this.playerCount === 6 || this.playerCount === 7)) {
+      return 4;
+    } if (this.round === 5) {
+      return 5;
+    }
+    return 0;
   }
 }
 
