@@ -17,6 +17,8 @@ enum GameActionType {
   REVEAL_MERLIN = 'revealMerlin',
   REVEAL_EVIL_EACH = 'revealEvilEach',
   ASSIGN_LEADER = 'assignLeader',
+  ASSIGN_TEAM = 'assignTeam',
+  ASSIGN_TASK = 'assignTask'
 }
 
 interface GameAction {
@@ -51,6 +53,8 @@ class GameService {
 
   private round: number = 0;
 
+  private teamMemberList: string[] = [];
+
   public get playerCount(): number {
     return Object.keys(this.player).length;
   }
@@ -82,6 +86,9 @@ class GameService {
       await this.startGame();
       await this.incrementGameStep();
       return;
+    } if (action.type === GameActionType.ASSIGN_TEAM && this.isLeader(client) && action.payload.length > 0) {
+      this.teamMemberList = action.payload;
+      await this.incrementGameStep();
     }
 
     this.broadcast(`${this.getPlayerByWebSocket(client)}:${message}`);
@@ -115,6 +122,14 @@ class GameService {
 
   public isHost(client: WebSocket): boolean {
     return this.player[this.host] === client;
+  }
+
+  public isLeader(client: WebSocket): boolean {
+    return this.player[this.leader] === client;
+  }
+
+  public isTeamMember(client: WebSocket): boolean {
+    return this.teamMemberList.some((player) => this.player[player] === client);
   }
 
   public getPlayerByWebSocket(client: WebSocket): string {
@@ -155,6 +170,8 @@ class GameService {
       this.incrementGameStep();
     } else if (this.step === 2) {
       this.AssignLeader();
+    } else if (this.step === 3) {
+      this.assignTask();
     }
     // TODO: handle step
   }
@@ -290,6 +307,15 @@ class GameService {
       return 5;
     }
     return 0;
+  }
+
+  assignTask(): void {
+    const action: GameAction = {
+      type: GameActionType.ASSIGN_TASK,
+    };
+    this.teamMemberList.forEach((player) => {
+      this.player[player].send(JSON.stringify(action));
+    });
   }
 }
 
