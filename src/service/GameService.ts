@@ -11,6 +11,7 @@ interface GameRole {
 
 enum GameActionType {
   NONE = '',
+  DECLARE_PLAYER = 'declarePlayer',
   START = 'start',
   DECLARE_ROLE = 'declareRole',
   REVEAL_EVIL = 'revealEvil',
@@ -93,9 +94,7 @@ class GameService {
     this.webSocketServer = new WebSocket.Server({ noServer: true });
     this.webSocketServer.on('connection', (webSocket: WebSocket, name: string) => {
       this.addPlayer(name, webSocket);
-
-      const message = Object.keys(this.player).join(',');
-      this.broadcast(message);
+      this.declarePlayer();
       webSocket.on('message', (data: string) => {
         this.handleMessage(data, webSocket);
         console.log(`message from WebSocket Client: ${data}`);
@@ -367,6 +366,14 @@ class GameService {
 
     this.broadcast(JSON.stringify(action));
     this.incrementGameStep();
+  }
+
+  declarePlayer(): void {
+    const action: GameAction = {
+      type: GameActionType.DECLARE_PLAYER,
+      payload: Object.keys(this.player),
+    };
+    this.broadcast(JSON.stringify(action));
   }
 }
 
