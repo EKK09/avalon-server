@@ -88,6 +88,34 @@ class GameService {
     return failCount > 0;
   }
 
+  private get getTeamSize(): number {
+    const { round, playerCount } = this;
+    if (round === 1) {
+      return playerCount < 8 ? 2 : 3;
+    } if (round === 2) {
+      return playerCount < 8 ? 3 : 4;
+    } if (round === 3 && playerCount === 5) {
+      return 2;
+    } if (round === 3 && playerCount === 7) {
+      return 3;
+    } if (round === 3) {
+      return 4;
+    } if (round === 4 && (playerCount === 5 || playerCount === 6)) {
+      return 3;
+    } if (round === 4 && playerCount === 7) {
+      return 4;
+    } if (round === 4) {
+      return 5;
+    } if (round === 5 && playerCount === 5) {
+      return 3;
+    } if (round === 5 && (playerCount === 6 || playerCount === 7)) {
+      return 4;
+    } if (round === 5) {
+      return 5;
+    }
+    return 0;
+  }
+
   constructor(host: string) {
     this.host = host;
     this.player = {};
@@ -308,39 +336,11 @@ class GameService {
   }
 
   private AssignLeader(): void {
-    const teamSize = this.getTeamSize();
     const action: GameAction = {
       type: GameActionType.ASSIGN_LEADER,
-      payload: teamSize,
+      payload: this.getTeamSize,
     };
     this.broadcast(JSON.stringify(action));
-  }
-
-  private getTeamSize(): number {
-    if (this.round === 1) {
-      return this.playerCount < 8 ? 2 : 3;
-    } if (this.round === 2) {
-      return this.playerCount < 8 ? 3 : 4;
-    } if (this.round === 3 && this.playerCount === 5) {
-      return 2;
-    } if (this.round === 3 && this.playerCount === 7) {
-      return 3;
-    } if (this.round === 3) {
-      return 4;
-    } if (this.round === 4 && (this.playerCount === 5 || this.playerCount === 6)) {
-      return 3;
-    } if (this.round === 4 && this.playerCount === 7) {
-      return 4;
-    } if (this.round === 4) {
-      return 5;
-    } if (this.round === 5 && this.playerCount === 5) {
-      return 3;
-    } if (this.round === 5 && (this.playerCount === 6 || this.playerCount === 7)) {
-      return 4;
-    } if (this.round === 5) {
-      return 5;
-    }
-    return 0;
   }
 
   assignTask(): void {
