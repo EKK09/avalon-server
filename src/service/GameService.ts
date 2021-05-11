@@ -354,6 +354,7 @@ class GameService {
 
   async handleVote(): Promise<void> {
     if (this.isVoteFinished) {
+      this.round += 1;
       await this.incrementGameStep();
     }
   }
