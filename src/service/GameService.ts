@@ -313,7 +313,7 @@ class GameService {
       type: GameActionType.ASSIGN_LEADER,
       payload: teamSize,
     };
-    this.player[this.leader].send(JSON.stringify(action));
+    this.broadcast(JSON.stringify(action));
   }
 
   private getTeamSize(): number {
@@ -346,10 +346,9 @@ class GameService {
   assignTask(): void {
     const action: GameAction = {
       type: GameActionType.ASSIGN_TASK,
+      payload: this.teamMemberList,
     };
-    this.teamMemberList.forEach((player) => {
-      this.player[player].send(JSON.stringify(action));
-    });
+    this.broadcast(JSON.stringify(action));
   }
 
   async handleVote(): Promise<void> {
