@@ -81,11 +81,11 @@ class GameService {
       }
     });
 
-    if (this.round === 4 && failCount > 1) {
-      return false;
+    if (this.round === 4) {
+      return failCount < 2;
     }
 
-    return failCount > 0;
+    return failCount === 0;
   }
 
   private get getTeamSize(): number {
