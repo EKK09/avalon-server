@@ -12,6 +12,7 @@ interface GameRole {
 enum GameActionType {
   NONE = '',
   DECLARE_PLAYER = 'declarePlayer',
+  DECLARE_ROUND = 'declareRound',
   START = 'start',
   DECLARE_ROLE = 'declareRole',
   REVEAL_EVIL = 'revealEvil',
@@ -222,7 +223,6 @@ class GameService {
   private async startGame(): Promise<void> {
     await this.setGameRole();
     this.declareGameRole();
-    this.round = 1;
   }
 
   private async incrementGameStep(): Promise<void> {
@@ -237,11 +237,22 @@ class GameService {
       this.incrementGameStep();
     } else if (this.step === 2) {
       // first round
+      this.incrementRound();
+      this.declareRound();
       this.AssignLeader();
     } else if (this.step === 3) {
       this.assignTask();
     } else if (this.step === 4) {
-      this.declareTaskResult();
+      this.declareVoteResultList();
+    } else if (this.step === 5) {
+      // second round
+      this.incrementRound();
+      this.declareRound();
+      this.AssignLeader();
+    } else if (this.step === 6) {
+      this.assignTask();
+    } else if (this.step === 7) {
+      this.declareVoteResultList();
     }
     // TODO: handle step
   }
@@ -359,14 +370,18 @@ class GameService {
     this.broadcast(JSON.stringify(action));
   }
 
+  incrementRound(): void {
+    // TODO: 寫進資料庫
+    this.round += 1;
+  }
+
   async handleVote(): Promise<void> {
     if (this.isVoteFinished) {
-      this.round += 1;
       await this.incrementGameStep();
     }
   }
 
-  declareTaskResult(): void {
+  declareVoteResultList(): void {
     const action: GameAction = {
       type: GameActionType.DECLARE_TASK_RESULT,
       payload: this.voteResultList,
@@ -380,6 +395,14 @@ class GameService {
     const action: GameAction = {
       type: GameActionType.DECLARE_PLAYER,
       payload: Object.keys(this.player),
+    };
+    this.broadcast(JSON.stringify(action));
+  }
+
+  declareRound(): void {
+    const action: GameAction = {
+      type: GameActionType.DECLARE_ROUND,
+      payload: this.round,
     };
     this.broadcast(JSON.stringify(action));
   }
