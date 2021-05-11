@@ -29,6 +29,10 @@ interface GameAction {
   payload?: any;
 }
 
+interface VoteResult {
+  [key: string]: boolean
+}
+
 class GameService {
   public host: string = '';
 
@@ -58,7 +62,7 @@ class GameService {
 
   private teamMemberList: string[] = [];
 
-  private voteResultList: boolean[] = [];
+  private voteResultList: VoteResult[] = [];
 
   public get playerCount(): number {
     return Object.keys(this.player).length;
@@ -76,7 +80,7 @@ class GameService {
     let failCount = 0;
 
     this.voteResultList.forEach((result) => {
-      if (result === false) {
+      if (Object.values(result)[0] === false) {
         failCount += 1;
       }
     });
@@ -132,7 +136,7 @@ class GameService {
 
   private async handleMessage(message: string, client: WebSocket): Promise<void> {
     const action: GameAction = GameService.getActionFromMessage(message);
-
+    const player = this.getPlayerByWebSocket(client);
     if (action.type === GameActionType.START && this.isHost(client) && this.round === 0) {
       await this.startGame();
       await this.incrementGameStep();
@@ -145,8 +149,11 @@ class GameService {
       return;
     }
 
-    if (action.type === GameActionType.VOTE && this.isTeamMember(client) && action.payload !== undefined) {
-      this.voteResultList.push(Boolean(action.payload));
+    if (action.type === GameActionType.VOTE && player in this.player && action.payload !== undefined) {
+      const voteResult: VoteResult = {
+        [player]: action.payload,
+      };
+      this.voteResultList.push(voteResult);
       await this.handleVote();
       return;
     }
@@ -229,6 +236,7 @@ class GameService {
       this.revealGameRole();
       this.incrementGameStep();
     } else if (this.step === 2) {
+      // first round
       this.AssignLeader();
     } else if (this.step === 3) {
       this.assignTask();
@@ -361,7 +369,7 @@ class GameService {
   declareTaskResult(): void {
     const action: GameAction = {
       type: GameActionType.DECLARE_TASK_RESULT,
-      payload: this.taskResult,
+      payload: this.voteResultList,
     };
 
     this.broadcast(JSON.stringify(action));
