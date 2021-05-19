@@ -16,6 +16,7 @@ import {
   DeclareTaskResultAction,
   AassignTaskAction,
   DeclareTeamSizeAction,
+  DeclareTaskListAction,
   DeclareLeaderAction,
   VoteResult,
   GameActionType,
@@ -59,6 +60,8 @@ class GameService {
 
   private voteResultList: VoteResult[] = [];
 
+  private taskList: boolean[] = [];
+
   public get playerCount(): number {
     return Object.keys(this.player).length;
   }
@@ -71,21 +74,21 @@ class GameService {
     return this.teamMemberList.length === this.voteResultList.length;
   }
 
-  private get taskResult(): boolean {
-    let failCount = 0;
+  // private get taskList(): boolean {
+  //   let failCount = 0;
 
-    this.voteResultList.forEach((result) => {
-      if (Object.values(result)[0] === false) {
-        failCount += 1;
-      }
-    });
+  //   this.voteResultList.forEach((result) => {
+  //     if (Object.values(result)[0] === false) {
+  //       failCount += 1;
+  //     }
+  //   });
 
-    if (this.round === 4) {
-      return failCount < 2;
-    }
+  //   if (this.round === 4) {
+  //     return failCount < 2;
+  //   }
 
-    return failCount === 0;
-  }
+  //   return failCount === 0;
+  // }
 
   private get getTeamSize(): number {
     const { round, playerCount } = this;
@@ -132,6 +135,7 @@ class GameService {
   private async handleMessage(message: string, client: WebSocket): Promise<void> {
     const action: GameAction = GameService.getActionFromMessage(message);
     const player = this.getPlayerByWebSocket(client);
+    console.log(action);
     if (action.type === GameActionType.START && this.isHost(client) && this.round === 0) {
       await this.startGame();
       await this.incrementGameStep();
@@ -261,6 +265,8 @@ class GameService {
   }
 
   private async handleStep() {
+    console.log(`step: ${this.step}`);
+    console.log(`round: ${this.round}`);
     if (this.step === 1) {
       this.revealGameRole();
       this.incrementGameStep();
@@ -271,7 +277,8 @@ class GameService {
     } else if (this.step === 3) {
       this.assignTask();
     } else if (this.step === 4) {
-      this.declareVoteResultList();
+      this.declareResult();
+      this.incrementGameStep();
     } else if (this.step === 5) {
       // second round
       this.incrementRound();
@@ -279,32 +286,41 @@ class GameService {
     } else if (this.step === 6) {
       this.assignTask();
     } else if (this.step === 7) {
-      this.declareVoteResultList();
-      this.assignGod();
+      this.declareResult();
+      this.incrementGameStep();
     } else if (this.step === 8) {
+      this.assignGod();
+    } else if (this.step === 9) {
       // third round
       this.incrementRound();
       this.initEachRound();
-    } else if (this.step === 9) {
-      this.assignTask();
     } else if (this.step === 10) {
-      this.declareVoteResultList();
-      this.assignGod();
+      this.assignTask();
     } else if (this.step === 11) {
+      this.declareResult();
+      this.incrementGameStep();
+    } else if (this.step === 12) {
+      this.assignGod();
+    } else if (this.step === 13) {
       // fourth round
       this.incrementRound();
       this.initEachRound();
-    } else if (this.step === 12) {
-      this.assignTask();
-    } else if (this.step === 13) {
-      this.declareVoteResultList();
-      this.assignGod();
     } else if (this.step === 14) {
+      this.assignTask();
+    } else if (this.step === 15) {
+      this.declareResult();
+      this.incrementGameStep();
+    } else if (this.step === 16) {
+      this.assignGod();
+    } else if (this.step === 17) {
       // fifth round
       this.incrementRound();
       this.initEachRound();
-    } else if (this.step === 15) {
+    } else if (this.step === 18) {
       this.assignTask();
+    } else if (this.step === 19) {
+      this.declareResult();
+      this.incrementGameStep();
     }
     // TODO: handle step
   }
@@ -448,6 +464,11 @@ class GameService {
     }
   }
 
+  declareResult() {
+    this.declareVoteResultList();
+    this.declareTaskList();
+  }
+
   declareVoteResultList(): void {
     const action: DeclareTaskResultAction = {
       type: GameActionType.DECLARE_TASK_RESULT,
@@ -455,7 +476,14 @@ class GameService {
     };
 
     this.broadcastAction(action);
-    this.incrementGameStep();
+  }
+
+  declareTaskList(): void {
+    const action: DeclareTaskListAction = {
+      type: GameActionType.DECLARE_TASK_LIST,
+      payload: this.taskList,
+    };
+    this.broadcastAction(action);
   }
 
   declarePlayer(): void {

@@ -18,6 +18,7 @@ export enum GameActionType {
   REVEAL_PLAYER = 'revealPlayer',
   ASSIGN_GOD_STATEMENT = 'assignGodStatement',
   DECLARE_GOD_STATEMENT = 'declareGodStatement',
+  DECLARE_TASK_LIST = 'declareTaskList',
 }
 export interface VoteResult {
   player: string
@@ -113,6 +114,10 @@ export interface DeclareGodStatementAction {
   type: GameActionType.DECLARE_GOD_STATEMENT;
   payload: GodStatement;
 }
+export interface DeclareTaskListAction {
+  type: GameActionType.DECLARE_TASK_LIST;
+  payload: boolean[];
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -122,6 +127,7 @@ export interface DeclareGodStatementAction {
 export type GameAction =
 NoneAction |
 AssignGodAction |
+DeclareTaskListAction |
 AssignGodStatementAction |
 DeclareGodStatementAction |
 AssignRevealPlayerAction |
