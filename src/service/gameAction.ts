@@ -12,7 +12,12 @@ export enum GameActionType {
   ASSIGN_TEAM = 'assignTeam',
   ASSIGN_TASK = 'assignTask',
   VOTE = 'vote',
-  DECLARE_TASK_RESULT = 'declareTaskResult'
+  DECLARE_TASK_RESULT = 'declareTaskResult',
+  ASSIGN_GOD = 'assignGod',
+  ASSIGN_REVEAL_PLAYER = 'assignRevealPlayer',
+  REVEAL_PLAYER = 'revealPlayer',
+  ASSIGN_GOD_STATEMENT = 'assignGodStatement',
+  DECLARE_GOD_STATEMENT = 'declareGodStatement',
 }
 export interface VoteResult {
   player: string
@@ -74,6 +79,40 @@ export interface NoneAction {
   type: GameActionType.NONE;
   payload: null;
 }
+export interface AssignGodAction {
+  type: GameActionType.ASSIGN_GOD;
+  payload: string;
+}
+export interface AssignRevealPlayerAction {
+  type: GameActionType.ASSIGN_REVEAL_PLAYER;
+  payload: string;
+}
+
+export interface RevealPlayer {
+  player: string;
+  isGood: boolean;
+}
+
+export interface RevealPlayerAction {
+  type: GameActionType.REVEAL_PLAYER;
+  payload: RevealPlayer;
+}
+
+export interface GodStatement {
+  god: string;
+  player: string;
+  isGood: boolean;
+}
+
+export interface AssignGodStatementAction {
+  type: GameActionType.ASSIGN_GOD_STATEMENT;
+  payload: GodStatement;
+}
+
+export interface DeclareGodStatementAction {
+  type: GameActionType.DECLARE_GOD_STATEMENT;
+  payload: GodStatement;
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -82,6 +121,11 @@ export interface NoneAction {
 
 export type GameAction =
 NoneAction |
+AssignGodAction |
+AssignGodStatementAction |
+DeclareGodStatementAction |
+AssignRevealPlayerAction |
+RevealPlayerAction |
 GameStartAction |
 DeclarePalyerAction |
 DeclareRoundAction |

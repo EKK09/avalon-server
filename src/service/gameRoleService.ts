@@ -12,12 +12,30 @@ export enum GameRoleName {
   UNSET = ''
 }
 class GameRoleService {
+  static GOOD_ROLE: GameRoleName[] = [
+    GameRoleName.MERLIN,
+    GameRoleName.PERCIVAL,
+    GameRoleName.GOOD,
+  ];
+
+  static EVIL_ROLE: GameRoleName[] = [
+    GameRoleName.ASSASSIN,
+    GameRoleName.MORGANA,
+    GameRoleName.OBERON,
+    GameRoleName.MORDRED,
+    GameRoleName.EVIL,
+  ];
+
   static getGameRoleList(playerCount: number): GameRoleName[] {
     const goods = GameRoleService.getGoodList(playerCount);
     const evils = GameRoleService.getEvilList(playerCount);
     const roles = [...goods, ...evils];
     const randomArray = makeRandomArray(roles);
     return randomArray;
+  }
+
+  static isGood(role: GameRoleName): boolean {
+    return GameRoleService.GOOD_ROLE.includes(role);
   }
 
   static getGoodList(playerCount: number): string[] {

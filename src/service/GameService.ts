@@ -3,6 +3,10 @@ import GameRoomModel from '../model/gameRoomModel';
 import GameRoleService, { GameRoleName } from './gameRoleService';
 import {
   GameAction,
+  GodStatement,
+  DeclareGodStatementAction,
+  AssignGodAction,
+  RevealPlayerAction,
   RevealMerlinAction,
   RevealEvilAction,
   RevealEvilEachAction,
@@ -150,6 +154,27 @@ class GameService {
       return;
     }
 
+    if (action.type === GameActionType.ASSIGN_REVEAL_PLAYER && this.isLeader(client) && action.payload) {
+      const revealablePlayer = action.payload;
+      const playerRole = this.role[revealablePlayer];
+      const isGood = GameRoleService.isGood(playerRole);
+      const revealAction: RevealPlayerAction = {
+        type: GameActionType.REVEAL_PLAYER,
+        payload: {
+          player: revealablePlayer,
+          isGood,
+        },
+      };
+      client.send(JSON.stringify(revealAction));
+      return;
+    }
+
+    if (action.type === GameActionType.ASSIGN_GOD_STATEMENT && this.isLeader(client) && action.payload) {
+      this.declareGodStatement(action.payload);
+      await this.incrementGameStep();
+      return;
+    }
+
     this.broadcast(`${this.getPlayerByWebSocket(client)}:${message}`);
   }
 
@@ -255,6 +280,10 @@ class GameService {
       this.assignTask();
     } else if (this.step === 7) {
       this.declareVoteResultList();
+      this.assignGod();
+    } else if (this.step === 8) {
+      this.declareVoteResultList();
+      this.assignGod();
     }
     // TODO: handle step
   }
@@ -420,6 +449,22 @@ class GameService {
     const action: DeclareRoundAction = {
       type: GameActionType.DECLARE_ROUND,
       payload: this.round,
+    };
+    this.broadcastAction(action);
+  }
+
+  assignGod(): void {
+    const action : AssignGodAction = {
+      type: GameActionType.ASSIGN_GOD,
+      payload: this.leader,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareGodStatement(statement: GodStatement) {
+    const action : DeclareGodStatementAction = {
+      type: GameActionType.DECLARE_GOD_STATEMENT,
+      payload: statement,
     };
     this.broadcastAction(action);
   }
