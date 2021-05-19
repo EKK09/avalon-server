@@ -13,6 +13,7 @@ enum GameActionType {
   NONE = '',
   DECLARE_PLAYER = 'declarePlayer',
   DECLARE_ROUND = 'declareRound',
+  DECLARE_TEAM_SIZE = 'declareTeamSize',
   START = 'start',
   DECLARE_ROLE = 'declareRole',
   REVEAL_EVIL = 'revealEvil',
@@ -238,7 +239,7 @@ class GameService {
     } else if (this.step === 2) {
       // first round
       this.incrementRound();
-      this.AssignLeader();
+      this.initEachRound();
     } else if (this.step === 3) {
       this.assignTask();
     } else if (this.step === 4) {
@@ -246,7 +247,7 @@ class GameService {
     } else if (this.step === 5) {
       // second round
       this.incrementRound();
-      this.AssignLeader();
+      this.initEachRound();
     } else if (this.step === 6) {
       this.assignTask();
     } else if (this.step === 7) {
@@ -352,9 +353,21 @@ class GameService {
     return players;
   }
 
-  private AssignLeader(): void {
+  private initEachRound(): void {
+    this.declareTeamSize();
+    this.assignLeader();
+  }
+
+  private assignLeader(): void {
     const action: GameAction = {
       type: GameActionType.ASSIGN_LEADER,
+    };
+    this.player[this.leader].send(JSON.stringify(action));
+  }
+
+  private declareTeamSize(): void {
+    const action: GameAction = {
+      type: GameActionType.DECLARE_TEAM_SIZE,
       payload: this.getTeamSize,
     };
     this.broadcast(JSON.stringify(action));
