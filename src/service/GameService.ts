@@ -140,9 +140,10 @@ class GameService {
       return;
     }
 
-    if (action.type === GameActionType.VOTE && player in this.player && action.payload !== undefined) {
+    if (action.type === GameActionType.VOTE && this.isValidVoter(player) && action.payload !== undefined) {
       const voteResult: VoteResult = {
-        [player]: action.payload,
+        player,
+        result: action.payload,
       };
       this.voteResultList.push(voteResult);
       await this.handleVote();
@@ -150,6 +151,13 @@ class GameService {
     }
 
     this.broadcast(`${this.getPlayerByWebSocket(client)}:${message}`);
+  }
+
+  private isValidVoter(player: string): boolean {
+    if (this.teamMemberList.includes(player) === false) {
+      return false;
+    }
+    return this.voteResultList.some((result: VoteResult) => result.player === player);
   }
 
   static getActionFromMessage(message: string): GameAction {

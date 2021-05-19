@@ -15,7 +15,8 @@ export enum GameActionType {
   DECLARE_TASK_RESULT = 'declareTaskResult'
 }
 export interface VoteResult {
-  [key: string]: boolean;
+  player: string
+  result: boolean;
 }
 export interface DeclarePalyerAction {
   type: GameActionType.DECLARE_PLAYER;
