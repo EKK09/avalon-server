@@ -8,7 +8,7 @@ export enum GameActionType {
   REVEAL_EVIL = 'revealEvil',
   REVEAL_MERLIN = 'revealMerlin',
   REVEAL_EVIL_EACH = 'revealEvilEach',
-  ASSIGN_LEADER = 'assignLeader',
+  DECLARE_LEADER = 'declareLeader',
   ASSIGN_TEAM = 'assignTeam',
   ASSIGN_TASK = 'assignTask',
   VOTE = 'vote',
@@ -45,8 +45,8 @@ export interface RevealEvilEachAction {
   type: GameActionType.REVEAL_EVIL_EACH;
   payload: string[];
 }
-export interface AssignLeaderAction {
-  type: GameActionType.ASSIGN_LEADER;
+export interface DeclareLeaderAction {
+  type: GameActionType.DECLARE_LEADER;
   payload: string;
 }
 export interface AssignTeamAction {
@@ -93,4 +93,4 @@ AssignTeamAction |
 AassignTaskAction |
 voteAction |
 DeclareTaskResultAction |
-AssignLeaderAction;
+DeclareLeaderAction;

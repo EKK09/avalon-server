@@ -1,7 +1,12 @@
 import WebSocket from 'ws';
 import GameRoomModel from '../model/gameRoomModel';
 import GameRoleService, { GameRoleName } from './gameRoleService';
-import { GameAction, VoteResult, GameActionType } from './gameAction';
+import {
+  GameAction,
+  DeclareLeaderAction,
+  VoteResult,
+  GameActionType,
+} from './gameAction';
 
 interface Player {
   [key: string]: WebSocket;
@@ -330,12 +335,12 @@ class GameService {
 
   private initEachRound(): void {
     this.declareTeamSize();
-    this.assignLeader();
+    this.declareLeader();
   }
 
-  private assignLeader(): void {
-    const action: GameAction = {
-      type: GameActionType.ASSIGN_LEADER,
+  private declareLeader(): void {
+    const action: DeclareLeaderAction = {
+      type: GameActionType.DECLARE_LEADER,
       payload: this.leader,
     };
     this.player[this.leader].send(JSON.stringify(action));
