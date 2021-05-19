@@ -74,21 +74,21 @@ class GameService {
     return this.teamMemberList.length === this.voteResultList.length;
   }
 
-  // private get taskList(): boolean {
-  //   let failCount = 0;
+  private get taskResult(): boolean {
+    let failCount = 0;
 
-  //   this.voteResultList.forEach((result) => {
-  //     if (Object.values(result)[0] === false) {
-  //       failCount += 1;
-  //     }
-  //   });
+    this.voteResultList.forEach((result) => {
+      if (Object.values(result)[0] === false) {
+        failCount += 1;
+      }
+    });
 
-  //   if (this.round === 4) {
-  //     return failCount < 2;
-  //   }
+    if (this.round === 4) {
+      return failCount < 2;
+    }
 
-  //   return failCount === 0;
-  // }
+    return failCount === 0;
+  }
 
   private get getTeamSize(): number {
     const { round, playerCount } = this;
@@ -460,6 +460,7 @@ class GameService {
 
   async handleVote(): Promise<void> {
     if (this.isVoteFinished) {
+      this.taskList.push(this.taskResult);
       await this.incrementGameStep();
     }
   }
