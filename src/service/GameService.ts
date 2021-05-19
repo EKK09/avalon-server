@@ -3,6 +3,15 @@ import GameRoomModel from '../model/gameRoomModel';
 import GameRoleService, { GameRoleName } from './gameRoleService';
 import {
   GameAction,
+  RevealMerlinAction,
+  RevealEvilAction,
+  RevealEvilEachAction,
+  DeclareRoleAction,
+  DeclareRoundAction,
+  DeclarePalyerAction,
+  DeclareTaskResultAction,
+  AassignTaskAction,
+  DeclareTeamSizeAction,
   DeclareLeaderAction,
   VoteResult,
   GameActionType,
@@ -165,6 +174,12 @@ class GameService {
     });
   }
 
+  private broadcastAction(action: GameAction) {
+    Object.values(this.player).forEach((client) => {
+      client.send(JSON.stringify(action));
+    });
+  }
+
   public playerExist(name: string) {
     return name in this.player;
   }
@@ -267,7 +282,7 @@ class GameService {
       } else if (role === GameRoleName.ASSASSIN) {
         this.ASSASSIN = name;
       }
-      const action: GameAction = {
+      const action: DeclareRoleAction = {
         type: GameActionType.DECLARE_ROLE,
         payload: role,
       };
@@ -281,21 +296,21 @@ class GameService {
       const client = this.player[player];
       if (role === GameRoleName.MERLIN) {
         const revealableEvilPlayers = this.getRevealableEvilPlayers();
-        const action: GameAction = {
+        const action: RevealEvilAction = {
           type: GameActionType.REVEAL_EVIL,
           payload: revealableEvilPlayers,
         };
         client.send(JSON.stringify(action));
       } else if (role === GameRoleName.PERCIVAL) {
         const revealableMerlinPlayers = this.getRevealableMerlinPlayers();
-        const action: GameAction = {
+        const action: RevealMerlinAction = {
           type: GameActionType.REVEAL_MERLIN,
           payload: revealableMerlinPlayers,
         };
         client.send(JSON.stringify(action));
       } else if (GameRoleService.isKnowEachOtherEvil(role)) {
         const knowEachOtherEvilPlayers = this.getKnowEachOtherEvilPlayers();
-        const action: GameAction = {
+        const action: RevealEvilEachAction = {
           type: GameActionType.REVEAL_EVIL_EACH,
           payload: knowEachOtherEvilPlayers,
         };
@@ -343,23 +358,24 @@ class GameService {
       type: GameActionType.DECLARE_LEADER,
       payload: this.leader,
     };
-    this.player[this.leader].send(JSON.stringify(action));
+    this.broadcastAction(action);
   }
 
   private declareTeamSize(): void {
-    const action: GameAction = {
+    const action: DeclareTeamSizeAction = {
       type: GameActionType.DECLARE_TEAM_SIZE,
       payload: this.getTeamSize,
     };
-    this.broadcast(JSON.stringify(action));
+    this.broadcastAction(action);
   }
 
   assignTask(): void {
-    const action: GameAction = {
+    const action: AassignTaskAction = {
       type: GameActionType.ASSIGN_TASK,
       payload: this.teamMemberList,
     };
-    this.broadcast(JSON.stringify(action));
+
+    this.broadcastAction(action);
   }
 
   incrementRound(): void {
@@ -375,29 +391,29 @@ class GameService {
   }
 
   declareVoteResultList(): void {
-    const action: GameAction = {
+    const action: DeclareTaskResultAction = {
       type: GameActionType.DECLARE_TASK_RESULT,
       payload: this.voteResultList,
     };
 
-    this.broadcast(JSON.stringify(action));
+    this.broadcastAction(action);
     this.incrementGameStep();
   }
 
   declarePlayer(): void {
-    const action: GameAction = {
+    const action: DeclarePalyerAction = {
       type: GameActionType.DECLARE_PLAYER,
       payload: Object.keys(this.player),
     };
-    this.broadcast(JSON.stringify(action));
+    this.broadcastAction(action);
   }
 
   declareRound(): void {
-    const action: GameAction = {
+    const action: DeclareRoundAction = {
       type: GameActionType.DECLARE_ROUND,
       payload: this.round,
     };
-    this.broadcast(JSON.stringify(action));
+    this.broadcastAction(action);
   }
 }
 
