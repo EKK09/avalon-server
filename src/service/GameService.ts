@@ -1,38 +1,13 @@
 import WebSocket from 'ws';
 import GameRoomModel from '../model/gameRoomModel';
 import GameRoleService, { GameRoleName } from './gameRoleService';
+import { GameAction, VoteResult, GameActionType } from './gameAction';
 
 interface Player {
   [key: string]: WebSocket;
 }
 interface GameRole {
   [key: string]: GameRoleName;
-}
-
-enum GameActionType {
-  NONE = '',
-  DECLARE_PLAYER = 'declarePlayer',
-  DECLARE_ROUND = 'declareRound',
-  DECLARE_TEAM_SIZE = 'declareTeamSize',
-  START = 'start',
-  DECLARE_ROLE = 'declareRole',
-  REVEAL_EVIL = 'revealEvil',
-  REVEAL_MERLIN = 'revealMerlin',
-  REVEAL_EVIL_EACH = 'revealEvilEach',
-  ASSIGN_LEADER = 'assignLeader',
-  ASSIGN_TEAM = 'assignTeam',
-  ASSIGN_TASK = 'assignTask',
-  VOTE = 'vote',
-  DECLARE_TASK_RESULT = 'declareTaskResult'
-}
-
-interface GameAction {
-  type: GameActionType;
-  payload?: any;
-}
-
-interface VoteResult {
-  [key: string]: boolean
 }
 
 class GameService {
@@ -361,6 +336,7 @@ class GameService {
   private assignLeader(): void {
     const action: GameAction = {
       type: GameActionType.ASSIGN_LEADER,
+      payload: this.leader,
     };
     this.player[this.leader].send(JSON.stringify(action));
   }
