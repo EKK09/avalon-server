@@ -282,8 +282,29 @@ class GameService {
       this.declareVoteResultList();
       this.assignGod();
     } else if (this.step === 8) {
+      // third round
+      this.incrementRound();
+      this.initEachRound();
+    } else if (this.step === 9) {
+      this.assignTask();
+    } else if (this.step === 10) {
       this.declareVoteResultList();
       this.assignGod();
+    } else if (this.step === 11) {
+      // fourth round
+      this.incrementRound();
+      this.initEachRound();
+    } else if (this.step === 12) {
+      this.assignTask();
+    } else if (this.step === 13) {
+      this.declareVoteResultList();
+      this.assignGod();
+    } else if (this.step === 14) {
+      // fifth round
+      this.incrementRound();
+      this.initEachRound();
+    } else if (this.step === 15) {
+      this.assignTask();
     }
     // TODO: handle step
   }
