@@ -238,7 +238,6 @@ class GameService {
     } else if (this.step === 2) {
       // first round
       this.incrementRound();
-      this.declareRound();
       this.AssignLeader();
     } else if (this.step === 3) {
       this.assignTask();
@@ -247,7 +246,6 @@ class GameService {
     } else if (this.step === 5) {
       // second round
       this.incrementRound();
-      this.declareRound();
       this.AssignLeader();
     } else if (this.step === 6) {
       this.assignTask();
@@ -373,6 +371,7 @@ class GameService {
   incrementRound(): void {
     // TODO: 寫進資料庫
     this.round += 1;
+    this.declareRound();
   }
 
   async handleVote(): Promise<void> {
