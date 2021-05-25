@@ -1,21 +1,21 @@
 import { getRandomSubArray, makeRandomArray } from '../common/randomHelper';
 
 export enum GameRoleName {
-  MERLIN = 'Merlin',
-  PERCIVAL = 'Percival',
-  ASSASSIN = 'Assassin',
-  MORGANA = 'Morgana',
-  OBERON = 'Oberon',
-  MORDRED = 'Mordred',
-  GOOD = 'good',
-  EVIL = 'evil',
+  MERLIN = 'MERLIN',
+  PERCIVAL = 'PERCIVAL',
+  ASSASSIN = 'ASSASSIN',
+  MORGANA = 'MORGANA',
+  OBERON = 'OBERON',
+  MORDRED = 'MORDRED',
+  SERVANT = 'SERVANT',
+  MINION = 'MINION',
   UNSET = ''
 }
 class GameRoleService {
   static GOOD_ROLE: GameRoleName[] = [
     GameRoleName.MERLIN,
     GameRoleName.PERCIVAL,
-    GameRoleName.GOOD,
+    GameRoleName.SERVANT,
   ];
 
   static EVIL_ROLE: GameRoleName[] = [
@@ -23,7 +23,7 @@ class GameRoleService {
     GameRoleName.MORGANA,
     GameRoleName.OBERON,
     GameRoleName.MORDRED,
-    GameRoleName.EVIL,
+    GameRoleName.MINION,
   ];
 
   static getGameRoleList(playerCount: number): GameRoleName[] {
@@ -41,11 +41,11 @@ class GameRoleService {
   static getGoodList(playerCount: number): string[] {
     const selectableGoods: string[] = [
       GameRoleName.PERCIVAL,
-      GameRoleName.GOOD,
-      GameRoleName.GOOD,
-      GameRoleName.GOOD,
-      GameRoleName.GOOD,
-      GameRoleName.GOOD,
+      GameRoleName.SERVANT,
+      GameRoleName.SERVANT,
+      GameRoleName.SERVANT,
+      GameRoleName.SERVANT,
+      GameRoleName.SERVANT,
     ];
     const selectedGoods:string[] = [GameRoleName.MERLIN];
     let selectedLength: number = 2;
@@ -67,9 +67,9 @@ class GameRoleService {
       GameRoleName.MORDRED,
       GameRoleName.OBERON,
       GameRoleName.MORGANA,
-      GameRoleName.EVIL,
-      GameRoleName.EVIL,
-      GameRoleName.EVIL];
+      GameRoleName.MINION,
+      GameRoleName.MINION,
+      GameRoleName.MINION];
     const selectedEvils:string[] = [GameRoleName.ASSASSIN];
     let selectedLength: number = 1;
     if (playerCount === 5 || playerCount === 6) {
@@ -88,7 +88,7 @@ class GameRoleService {
       GameRoleName.OBERON,
       GameRoleName.MORGANA,
       GameRoleName.ASSASSIN,
-      GameRoleName.EVIL,
+      GameRoleName.MINION,
     ];
     return RevealableEvils.includes(role);
   }
@@ -97,7 +97,7 @@ class GameRoleService {
     const evils = [
       GameRoleName.MORDRED,
       GameRoleName.MORGANA,
-      GameRoleName.EVIL,
+      GameRoleName.MINION,
       GameRoleName.ASSASSIN,
     ];
     return evils.includes(role);
