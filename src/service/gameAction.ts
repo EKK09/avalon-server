@@ -12,6 +12,7 @@ export enum GameActionType {
   ASSIGN_TEAM = 'ASSIGN_TEAM',
   ASSIGN_TASK = 'ASSIGN_TASK',
   VOTE = 'VOTE',
+  APPROVE = 'APPROVE',
   DECLARE_TASK_RESULT = 'DECLARE_TASK_RESULT',
   ASSIGN_GOD = 'ASSIGN_GOD',
   ASSIGN_REVEAL_PLAYER = 'ASSIGN_REVEAL_PLAYER',
@@ -66,6 +67,10 @@ export interface AassignTaskAction {
 }
 export interface voteAction {
   type: GameActionType.VOTE;
+  payload: boolean;
+}
+export interface approveAction {
+  type: GameActionType.APPROVE;
   payload: boolean;
 }
 export interface DeclareTaskResultAction {
@@ -126,6 +131,7 @@ export interface DeclareTaskListAction {
 
 export type GameAction =
 NoneAction |
+approveAction |
 AssignGodAction |
 DeclareTaskListAction |
 AssignGodStatementAction |
