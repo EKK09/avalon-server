@@ -62,6 +62,10 @@ class GameService {
 
   private taskList: boolean[] = [];
 
+  private approvalList: VoteResult[] = [];
+
+  private unApproveCount: number = 0;
+
   public get playerCount(): number {
     return Object.keys(this.player).length;
   }
@@ -74,11 +78,15 @@ class GameService {
     return this.teamMemberList.length === this.voteResultList.length;
   }
 
+  private get isApproveFinished(): boolean {
+    return this.approvalList.length === this.playerCount;
+  }
+
   private get taskResult(): boolean {
     let failCount = 0;
 
     this.voteResultList.forEach((result) => {
-      if (Object.values(result)[0] === false) {
+      if (result.result === false) {
         failCount += 1;
       }
     });
@@ -88,6 +96,20 @@ class GameService {
     }
 
     return failCount === 0;
+  }
+
+  private get approveResult(): boolean {
+    let rejectCount = 0;
+    let approveCount = 0;
+    this.approvalList.forEach((result) => {
+      if (result.result === false) {
+        rejectCount += 1;
+      } else {
+        approveCount += 1;
+      }
+    });
+
+    return approveCount > rejectCount;
   }
 
   private get getTeamSize(): number {
@@ -157,6 +179,15 @@ class GameService {
       await this.handleVote();
       return;
     }
+    if (action.type === GameActionType.APPROVE && this.isValidApprover(player) && action.payload !== undefined) {
+      const voteResult: VoteResult = {
+        player,
+        result: action.payload,
+      };
+      this.approvalList.push(voteResult);
+      await this.handleVote();
+      return;
+    }
 
     if (action.type === GameActionType.ASSIGN_REVEAL_PLAYER && this.isLeader(client) && action.payload) {
       const revealablePlayer = action.payload;
@@ -187,6 +218,11 @@ class GameService {
       return false;
     }
     return this.voteResultList.some((result: VoteResult) => result.player === player);
+  }
+
+  private isValidApprover(player: string): boolean {
+    const approvedPlayers = this.approvalList.map((item) => item.player);
+    return !approvedPlayers.includes(player);
   }
 
   static getActionFromMessage(message: string): GameAction {
@@ -462,6 +498,15 @@ class GameService {
     if (this.isVoteFinished) {
       this.taskList.push(this.taskResult);
       await this.incrementGameStep();
+    }
+  }
+
+  async handleApprove(): Promise<void> {
+    if (this.isApproveFinished && this.approveResult) {
+      await this.incrementGameStep();
+    } else if (this.isApproveFinished && this.approveResult === false) {
+      this.unApproveCount += 1;
+      // TODO: 換下輪
     }
   }
 
