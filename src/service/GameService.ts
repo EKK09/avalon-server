@@ -225,7 +225,8 @@ class GameService {
     if (this.teamMemberList.includes(player) === false) {
       return false;
     }
-    return this.voteResultList.some((result: VoteResult) => result.player === player);
+    const votedPlayers = this.voteResultList.map((item) => item.player);
+    return !votedPlayers.includes(player);
   }
 
   private isValidApprover(player: string): boolean {
