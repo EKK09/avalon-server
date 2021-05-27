@@ -284,6 +284,14 @@ class GameService {
     return this.revealedPlayerList.some((revealedPlayer) => revealedPlayer === player);
   }
 
+  public resetApproveList(): void {
+    this.approvalList = [];
+  }
+
+  public resetVoteResultList(): void {
+    this.voteResultList = [];
+  }
+
   public getPlayerByWebSocket(client: WebSocket): string {
     const players = Object.keys(this.player);
     for (let index = 0; index < players.length; index += 1) {
@@ -483,10 +491,13 @@ class GameService {
   }
 
   async handleVote(): Promise<void> {
-    if (this.isVoteFinished) {
-      this.taskList.push(this.taskResult);
-      await this.incrementGameStep();
+    if (this.isVoteFinished === false) {
+      return;
     }
+
+    this.taskList.push(this.taskResult);
+    this.resetVoteResultList();
+    await this.incrementGameStep();
   }
 
   async handleApprove(): Promise<void> {
@@ -501,6 +512,7 @@ class GameService {
     } else {
       this.unApproveCount = 0;
     }
+    this.resetApproveList();
   }
 
   declareResult() {
