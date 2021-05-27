@@ -124,25 +124,35 @@ class GameService {
     const { round, playerCount } = this;
     if (round === 1) {
       return playerCount < 8 ? 2 : 3;
-    } if (round === 2) {
+    }
+    if (round === 2) {
       return playerCount < 8 ? 3 : 4;
-    } if (round === 3 && playerCount === 5) {
+    }
+    if (round === 3 && playerCount === 5) {
       return 2;
-    } if (round === 3 && playerCount === 7) {
+    }
+    if (round === 3 && playerCount === 7) {
       return 3;
-    } if (round === 3) {
+    }
+    if (round === 3) {
       return 4;
-    } if (round === 4 && (playerCount === 5 || playerCount === 6)) {
+    }
+    if (round === 4 && (playerCount === 5 || playerCount === 6)) {
       return 3;
-    } if (round === 4 && playerCount === 7) {
+    }
+    if (round === 4 && playerCount === 7) {
       return 4;
-    } if (round === 4) {
+    }
+    if (round === 4) {
       return 5;
-    } if (round === 5 && playerCount === 5) {
+    }
+    if (round === 5 && playerCount === 5) {
       return 3;
-    } if (round === 5 && (playerCount === 6 || playerCount === 7)) {
+    }
+    if (round === 5 && (playerCount === 6 || playerCount === 7)) {
       return 4;
-    } if (round === 5) {
+    }
+    if (round === 5) {
       return 5;
     }
     return 0;
