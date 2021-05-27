@@ -42,6 +42,8 @@ class GameService {
 
   public player: Player;
 
+  public playerList: string[] = [];
+
   private role: GameRole = {};
 
   private MERLIN: string = '';
@@ -77,7 +79,7 @@ class GameService {
   }
 
   public get leader(): string {
-    return Object.keys(this.player)[this.round - 1];
+    return this.playerList[this.round - 1];
   }
 
   private get isVoteFinished(): boolean {
@@ -299,6 +301,7 @@ class GameService {
       return false;
     }
     this.player[name] = webSocket;
+    this.playerList.push(name);
     return true;
   }
 
@@ -534,7 +537,7 @@ class GameService {
   declarePlayer(): void {
     const action: DeclarePalyerAction = {
       type: GameActionType.DECLARE_PLAYER,
-      payload: Object.keys(this.player),
+      payload: this.playerList,
     };
     this.broadcastAction(action);
   }
