@@ -20,6 +20,10 @@ import {
   DeclareLeaderAction,
   VoteResult,
   GameActionType,
+  DeclareTeamAction,
+  DeclareApprovalResultAction,
+  DeclareRevealedPlayerListAction,
+  DeclareApprovalListAction,
 } from './gameAction';
 
 interface Player {
@@ -57,6 +61,8 @@ class GameService {
   private round: number = 0;
 
   private teamMemberList: string[] = [];
+
+  private revealedPlayerList: string[] = [];
 
   private voteResultList: VoteResult[] = [];
 
@@ -185,12 +191,14 @@ class GameService {
         result: action.payload,
       };
       this.approvalList.push(voteResult);
-      await this.handleVote();
+      await this.handleApprove();
       return;
     }
 
-    if (action.type === GameActionType.ASSIGN_REVEAL_PLAYER && this.isLeader(client) && action.payload) {
+    if (action.type === GameActionType.ASSIGN_REVEAL_PLAYER && this.isLeader(client) && !this.isRevealedPlayer(action.payload)) {
       const revealablePlayer = action.payload;
+      this.revealedPlayerList.push(revealablePlayer);
+      this.declareRevealedPlayerList();
       const playerRole = this.role[revealablePlayer];
       const isGood = GameRoleService.isGood(playerRole);
       const revealAction: RevealPlayerAction = {
@@ -206,7 +214,7 @@ class GameService {
 
     if (action.type === GameActionType.ASSIGN_GOD_STATEMENT && this.isLeader(client) && action.payload) {
       this.declareGodStatement(action.payload);
-      await this.incrementGameStep();
+      await this.resetGameStep();
       return;
     }
 
@@ -269,6 +277,10 @@ class GameService {
     return this.teamMemberList.some((player) => this.player[player] === client);
   }
 
+  public isRevealedPlayer(player: string): boolean {
+    return this.revealedPlayerList.some((revealedPlayer) => revealedPlayer === player);
+  }
+
   public getPlayerByWebSocket(client: WebSocket): string {
     const players = Object.keys(this.player);
     for (let index = 0; index < players.length; index += 1) {
@@ -292,11 +304,16 @@ class GameService {
   private async startGame(): Promise<void> {
     await this.setGameRole();
     this.declareGameRole();
+    this.revealGameRole();
+  }
+
+  private async resetGameStep(): Promise<void> {
+    this.step = 1;
+    this.handleStep();
   }
 
   private async incrementGameStep(): Promise<void> {
-    const step = await GameRoomModel.incrementGameStep(this.roomId.toString());
-    this.step = step;
+    this.step += 1;
     this.handleStep();
   }
 
@@ -304,61 +321,28 @@ class GameService {
     console.log(`step: ${this.step}`);
     console.log(`round: ${this.round}`);
     if (this.step === 1) {
-      this.revealGameRole();
-      this.incrementGameStep();
+      this.incrementRound();
+      this.declareTeamSize();
+      this.declareLeader();
     } else if (this.step === 2) {
-      // first round
-      this.incrementRound();
-      this.initEachRound();
+      // 宣告選擇出任務玩家
+      this.declareTeam();
     } else if (this.step === 3) {
-      this.assignTask();
+      // 宣告任務結果
+      this.declareTaskList();
+      this.afterDeclareResult();
     } else if (this.step === 4) {
-      this.declareResult();
-      this.incrementGameStep();
-    } else if (this.step === 5) {
-      // second round
-      this.incrementRound();
-      this.initEachRound();
-    } else if (this.step === 6) {
-      this.assignTask();
-    } else if (this.step === 7) {
-      this.declareResult();
-      this.incrementGameStep();
-    } else if (this.step === 8) {
+      // 指派湖中女神
       this.assignGod();
-    } else if (this.step === 9) {
-      // third round
-      this.incrementRound();
-      this.initEachRound();
-    } else if (this.step === 10) {
-      this.assignTask();
-    } else if (this.step === 11) {
-      this.declareResult();
-      this.incrementGameStep();
-    } else if (this.step === 12) {
-      this.assignGod();
-    } else if (this.step === 13) {
-      // fourth round
-      this.incrementRound();
-      this.initEachRound();
-    } else if (this.step === 14) {
-      this.assignTask();
-    } else if (this.step === 15) {
-      this.declareResult();
-      this.incrementGameStep();
-    } else if (this.step === 16) {
-      this.assignGod();
-    } else if (this.step === 17) {
-      // fifth round
-      this.incrementRound();
-      this.initEachRound();
-    } else if (this.step === 18) {
-      this.assignTask();
-    } else if (this.step === 19) {
-      this.declareResult();
-      this.incrementGameStep();
     }
-    // TODO: handle step
+  }
+
+  private afterDeclareResult(): void {
+    if (this.round > 1) {
+      this.incrementGameStep();
+    } else {
+      this.resetGameStep();
+    }
   }
 
   async createRoom(): Promise<number> {
@@ -502,11 +486,16 @@ class GameService {
   }
 
   async handleApprove(): Promise<void> {
-    if (this.isApproveFinished && this.approveResult) {
-      await this.incrementGameStep();
-    } else if (this.isApproveFinished && this.approveResult === false) {
+    if (this.isApproveFinished === false) {
+      return;
+    }
+    this.declareApprovalResultList();
+    this.declareApprovalResult();
+    if (this.approveResult === false) {
       this.unApproveCount += 1;
-      // TODO: 換下輪
+      this.resetGameStep();
+    } else {
+      this.unApproveCount = 0;
     }
   }
 
@@ -524,6 +513,15 @@ class GameService {
     this.broadcastAction(action);
   }
 
+  declareApprovalResultList(): void {
+    const action: DeclareApprovalListAction = {
+      type: GameActionType.DECLARE_APPROVAL_LIST,
+      payload: this.approvalList,
+    };
+
+    this.broadcastAction(action);
+  }
+
   declareTaskList(): void {
     const action: DeclareTaskListAction = {
       type: GameActionType.DECLARE_TASK_LIST,
@@ -536,6 +534,30 @@ class GameService {
     const action: DeclarePalyerAction = {
       type: GameActionType.DECLARE_PLAYER,
       payload: Object.keys(this.player),
+    };
+    this.broadcastAction(action);
+  }
+
+  declareTeam(): void {
+    const action: DeclareTeamAction = {
+      type: GameActionType.DECLARE_TEAM,
+      payload: this.teamMemberList,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareApprovalResult(): void {
+    const action: DeclareApprovalResultAction = {
+      type: GameActionType.DECLARE_APPROVAL_RESULT,
+      payload: this.approveResult,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareRevealedPlayerList(): void {
+    const action: DeclareRevealedPlayerListAction = {
+      type: GameActionType.DECLARE_REVEALED_PLAYER_LIST,
+      payload: this.revealedPlayerList,
     };
     this.broadcastAction(action);
   }

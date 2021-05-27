@@ -10,12 +10,16 @@ export enum GameActionType {
   REVEAL_EVIL_EACH = 'REVEAL_EVIL_EACH',
   DECLARE_LEADER = 'DECLARE_LEADER',
   ASSIGN_TEAM = 'ASSIGN_TEAM',
+  DECLARE_TEAM = 'DECLARE_TEAM',
   ASSIGN_TASK = 'ASSIGN_TASK',
   VOTE = 'VOTE',
   APPROVE = 'APPROVE',
+  DECLARE_APPROVAL_RESULT = 'DECLARE_APPROVAL_RESULT',
+  DECLARE_APPROVAL_LIST = 'DECLARE_APPROVAL_LIST',
   DECLARE_TASK_RESULT = 'DECLARE_TASK_RESULT',
   ASSIGN_GOD = 'ASSIGN_GOD',
   ASSIGN_REVEAL_PLAYER = 'ASSIGN_REVEAL_PLAYER',
+  DECLARE_REVEALED_PLAYER_LIST = 'DECLARE_REVEALED_PLAYER_LIST',
   REVEAL_PLAYER = 'REVEAL_PLAYER',
   ASSIGN_GOD_STATEMENT = 'ASSIGN_GOD_STATEMENT',
   DECLARE_GOD_STATEMENT = 'DECLARE_GOD_STATEMENT',
@@ -36,6 +40,14 @@ export interface DeclareRoundAction {
 export interface DeclareTeamSizeAction {
   type: GameActionType.DECLARE_TEAM_SIZE;
   payload: number;
+}
+export interface DeclareTeamAction {
+  type: GameActionType.DECLARE_TEAM;
+  payload: string[];
+}
+export interface DeclareApprovalResultAction {
+  type: GameActionType.DECLARE_APPROVAL_RESULT;
+  payload: boolean;
 }
 export interface DeclareRoleAction {
   type: GameActionType.DECLARE_ROLE;
@@ -123,6 +135,14 @@ export interface DeclareTaskListAction {
   type: GameActionType.DECLARE_TASK_LIST;
   payload: boolean[];
 }
+export interface DeclareRevealedPlayerListAction {
+  type: GameActionType.DECLARE_REVEALED_PLAYER_LIST;
+  payload: string[];
+}
+export interface DeclareApprovalListAction {
+  type: GameActionType.DECLARE_APPROVAL_LIST;
+  payload: VoteResult[];
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -131,6 +151,10 @@ export interface DeclareTaskListAction {
 
 export type GameAction =
 NoneAction |
+DeclareApprovalResultAction |
+DeclareTeamAction |
+DeclareRevealedPlayerListAction |
+DeclareApprovalListAction |
 approveAction |
 AssignGodAction |
 DeclareTaskListAction |
