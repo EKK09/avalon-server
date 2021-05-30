@@ -26,6 +26,9 @@ export enum GameActionType {
   DECLARE_GOD_STATEMENT = 'DECLARE_GOD_STATEMENT',
   DECLARE_TASK_LIST = 'DECLARE_TASK_LIST',
   DECLARE_GAME_RESULT = 'DECLARE_GAME_RESULT',
+  DECLARE_ASSASSIN = 'DECLARE_ASSASSIN',
+  DECLARE_KILL_RESULT = 'DECLARE_KILL_RESULT',
+  ASSIGN_KILL_PLAYER = 'ASSIGN_KILL_PLAYER'
 }
 export interface VoteResult {
   player: string
@@ -153,6 +156,18 @@ export interface DeclareGameResultAction {
   type: GameActionType.DECLARE_GAME_RESULT;
   payload: boolean;
 }
+export interface DeclareAssassinAction {
+  type: GameActionType.DECLARE_ASSASSIN;
+  payload: string;
+}
+export interface AssignKillPlayerAction {
+  type: GameActionType.ASSIGN_KILL_PLAYER;
+  payload: string;
+}
+export interface DeclareKillResultAction {
+  type: GameActionType.DECLARE_KILL_RESULT;
+  payload: boolean;
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -161,6 +176,9 @@ export interface DeclareGameResultAction {
 
 export type GameAction =
 NoneAction |
+AssignKillPlayerAction |
+DeclareAssassinAction |
+DeclareKillResultAction |
 DeclareUnApprovalCountAction |
 DeclareGameResultAction |
 DeclareApprovalResultAction |

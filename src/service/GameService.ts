@@ -26,6 +26,8 @@ import {
   DeclareApprovalListAction,
   DeclareUnApprovalCountAction,
   DeclareGameResultAction,
+  DeclareAssassinAction,
+  DeclareKillResultAction,
 } from './gameAction';
 
 interface Player {
@@ -75,6 +77,8 @@ class GameService {
   private approvalList: VoteResult[] = [];
 
   private unApproveCount: number = 0;
+
+  private isMerlinKilled: boolean = false;
 
   public get playerCount(): number {
     return Object.keys(this.player).length;
@@ -241,6 +245,13 @@ class GameService {
       await this.resetGameStep();
       return;
     }
+    if (action.type === GameActionType.ASSIGN_KILL_PLAYER && this.ASSASSIN === player && action.payload) {
+      const killedPlayer = action.payload;
+      this.isMerlinKilled = this.MERLIN === killedPlayer;
+      this.declareKillResult(this.isMerlinKilled);
+      this.handleStep();
+      return;
+    }
 
     this.broadcast(`${this.getPlayerByWebSocket(client)}:${message}`);
   }
@@ -355,16 +366,9 @@ class GameService {
     console.log(`step: ${this.step}`);
     console.log(`round: ${this.round}`);
 
-    if (this.unApproveCount >= 5) {
-      this.declareGameResult(false);
-      return;
-    }
-
-    if (this.failCount >= 3) {
-      this.declareGameResult(false);
-      return;
-    }
-    if (this.successCount >= 3) {
+    if (this.unApproveCount >= 5 || this.failCount >= 3 || this.isMerlinKilled) {
+      this.step = 6;
+    } else if (this.successCount >= 3) {
       this.step = 5;
     }
 
@@ -384,6 +388,8 @@ class GameService {
       this.assignGod();
     } else if (this.step === 5) {
       // 刺客現身
+    } else if (this.step === 6) {
+      // 宣告結果
     }
   }
 
@@ -652,6 +658,22 @@ class GameService {
   declareGameResult(result: boolean) {
     const action: DeclareGameResultAction = {
       type: GameActionType.DECLARE_GAME_RESULT,
+      payload: result,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareAssassin() {
+    const action: DeclareAssassinAction = {
+      type: GameActionType.DECLARE_ASSASSIN,
+      payload: this.ASSASSIN,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareKillResult(result: boolean) {
+    const action: DeclareKillResultAction = {
+      type: GameActionType.DECLARE_KILL_RESULT,
       payload: result,
     };
     this.broadcastAction(action);
