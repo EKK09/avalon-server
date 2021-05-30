@@ -25,6 +25,7 @@ export enum GameActionType {
   ASSIGN_GOD_STATEMENT = 'ASSIGN_GOD_STATEMENT',
   DECLARE_GOD_STATEMENT = 'DECLARE_GOD_STATEMENT',
   DECLARE_TASK_LIST = 'DECLARE_TASK_LIST',
+  DECLARE_GAME_RESULT = 'DECLARE_GAME_RESULT',
 }
 export interface VoteResult {
   player: string
@@ -148,6 +149,10 @@ export interface DeclareUnApprovalCountAction {
   type: GameActionType.DECLARE_UNAPPROVAL_COUNT;
   payload: number;
 }
+export interface DeclareGameResultAction {
+  type: GameActionType.DECLARE_GAME_RESULT;
+  payload: boolean;
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -156,7 +161,8 @@ export interface DeclareUnApprovalCountAction {
 
 export type GameAction =
 NoneAction |
-  DeclareUnApprovalCountAction |
+DeclareUnApprovalCountAction |
+DeclareGameResultAction |
 DeclareApprovalResultAction |
 DeclareTeamAction |
 DeclareRevealedPlayerListAction |
