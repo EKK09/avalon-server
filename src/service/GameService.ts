@@ -353,14 +353,14 @@ class GameService {
     } else if (this.step === 3) {
       // 宣告任務結果
       this.declareTaskList();
-      this.afterDeclareResult();
+      this.afterDeclareTaskResult();
     } else if (this.step === 4) {
       // 指派湖中女神
       this.assignGod();
     }
   }
 
-  private afterDeclareResult(): void {
+  private afterDeclareTaskResult(): void {
     if (this.round > 1) {
       this.incrementGameStep();
     } else {
