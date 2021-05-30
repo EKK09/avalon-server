@@ -28,12 +28,13 @@ import {
   DeclareGameResultAction,
   DeclareAssassinAction,
   DeclareKillResultAction,
+  GameResult,
 } from './gameAction';
 
 interface Player {
   [key: string]: WebSocket;
 }
-interface GameRole {
+export interface GameRole {
   [key: string]: GameRoleName;
 }
 
@@ -668,9 +669,14 @@ class GameService {
   }
 
   declareGameResult() {
+    const gameResult: GameResult = {
+      result: this.gameResult,
+      isMerlinKilled: this.isMerlinKilled,
+      role: this.role,
+    };
     const action: DeclareGameResultAction = {
       type: GameActionType.DECLARE_GAME_RESULT,
-      payload: this.gameResult,
+      payload: gameResult,
     };
     this.broadcastAction(action);
   }

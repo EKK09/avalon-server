@@ -1,3 +1,5 @@
+import { GameRole } from './GameService';
+
 export enum GameActionType {
   NONE = '',
   DECLARE_PLAYER = 'DECLARE_PLAYER',
@@ -33,6 +35,12 @@ export enum GameActionType {
 export interface VoteResult {
   player: string
   result: boolean;
+}
+
+export interface GameResult {
+  result: boolean;
+  isMerlinKilled: boolean;
+  role: GameRole
 }
 export interface DeclarePalyerAction {
   type: GameActionType.DECLARE_PLAYER;
@@ -154,7 +162,7 @@ export interface DeclareUnApprovalCountAction {
 }
 export interface DeclareGameResultAction {
   type: GameActionType.DECLARE_GAME_RESULT;
-  payload: boolean;
+  payload: GameResult;
 }
 export interface DeclareAssassinAction {
   type: GameActionType.DECLARE_ASSASSIN;
