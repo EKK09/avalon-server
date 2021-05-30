@@ -16,6 +16,7 @@ export enum GameActionType {
   APPROVE = 'APPROVE',
   DECLARE_APPROVAL_RESULT = 'DECLARE_APPROVAL_RESULT',
   DECLARE_APPROVAL_LIST = 'DECLARE_APPROVAL_LIST',
+  DECLARE_UNAPPROVAL_COUNT = 'DECLARE_UNAPPROVAL_COUNT',
   DECLARE_TASK_RESULT = 'DECLARE_TASK_RESULT',
   ASSIGN_GOD = 'ASSIGN_GOD',
   ASSIGN_REVEAL_PLAYER = 'ASSIGN_REVEAL_PLAYER',
@@ -143,6 +144,10 @@ export interface DeclareApprovalListAction {
   type: GameActionType.DECLARE_APPROVAL_LIST;
   payload: VoteResult[];
 }
+export interface DeclareUnApprovalCountAction {
+  type: GameActionType.DECLARE_UNAPPROVAL_COUNT;
+  payload: number;
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -151,6 +156,7 @@ export interface DeclareApprovalListAction {
 
 export type GameAction =
 NoneAction |
+  DeclareUnApprovalCountAction |
 DeclareApprovalResultAction |
 DeclareTeamAction |
 DeclareRevealedPlayerListAction |

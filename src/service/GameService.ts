@@ -24,6 +24,7 @@ import {
   DeclareApprovalResultAction,
   DeclareRevealedPlayerListAction,
   DeclareApprovalListAction,
+  DeclareUnApprovalCountAction,
 } from './gameAction';
 
 interface Player {
@@ -523,6 +524,7 @@ class GameService {
       this.unApproveCount = 0;
     }
     this.resetApproveList();
+    this.declareUnApprovalCount();
   }
 
   declareResult() {
@@ -576,6 +578,14 @@ class GameService {
     const action: DeclareApprovalResultAction = {
       type: GameActionType.DECLARE_APPROVAL_RESULT,
       payload: this.approveResult,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareUnApprovalCount(): void {
+    const action: DeclareUnApprovalCountAction = {
+      type: GameActionType.DECLARE_UNAPPROVAL_COUNT,
+      payload: this.unApproveCount,
     };
     this.broadcastAction(action);
   }
