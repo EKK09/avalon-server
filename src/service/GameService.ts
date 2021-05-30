@@ -122,6 +122,17 @@ class GameService {
     return successCount;
   }
 
+  private get gameResult(): boolean {
+    if (this.isMerlinKilled) {
+      return false;
+    }
+
+    if (this.failCount >= 3) {
+      return false;
+    }
+    return true;
+  }
+
   private get approveResult(): boolean {
     let rejectCount = 0;
     let approveCount = 0;
@@ -388,8 +399,9 @@ class GameService {
       this.assignGod();
     } else if (this.step === 5) {
       // 刺客現身
+      this.declareAssassin();
     } else if (this.step === 6) {
-      // 宣告結果
+      this.declareGameResult();
     }
   }
 
@@ -655,10 +667,10 @@ class GameService {
     this.broadcastAction(action);
   }
 
-  declareGameResult(result: boolean) {
+  declareGameResult() {
     const action: DeclareGameResultAction = {
       type: GameActionType.DECLARE_GAME_RESULT,
-      payload: result,
+      payload: this.gameResult,
     };
     this.broadcastAction(action);
   }
