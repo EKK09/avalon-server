@@ -25,6 +25,7 @@ import {
   DeclareRevealedPlayerListAction,
   DeclareApprovalListAction,
   DeclareUnApprovalCountAction,
+  DeclareGameResultAction,
 } from './gameAction';
 
 interface Player {
@@ -105,6 +106,16 @@ class GameService {
     }
 
     return failCount === 0;
+  }
+
+  private get failCount(): number {
+    const failCount = this.taskList.filter((task) => !task).length;
+    return failCount;
+  }
+
+  private get successCount(): number {
+    const successCount = this.taskList.filter((task) => task).length;
+    return successCount;
   }
 
   private get approveResult(): boolean {
@@ -343,6 +354,20 @@ class GameService {
   private async handleStep() {
     console.log(`step: ${this.step}`);
     console.log(`round: ${this.round}`);
+
+    if (this.unApproveCount >= 5) {
+      this.declareGameResult(false);
+      return;
+    }
+
+    if (this.failCount >= 3) {
+      this.declareGameResult(false);
+      return;
+    }
+    if (this.successCount >= 3) {
+      this.step = 5;
+    }
+
     if (this.step === 1) {
       this.incrementRound();
       this.declareTeamSize();
@@ -357,6 +382,8 @@ class GameService {
     } else if (this.step === 4) {
       // 指派湖中女神
       this.assignGod();
+    } else if (this.step === 5) {
+      // 刺客現身
     }
   }
 
@@ -618,6 +645,14 @@ class GameService {
     const action : DeclareGodStatementAction = {
       type: GameActionType.DECLARE_GOD_STATEMENT,
       payload: statement,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareGameResult(result: boolean) {
+    const action: DeclareGameResultAction = {
+      type: GameActionType.DECLARE_GAME_RESULT,
+      payload: result,
     };
     this.broadcastAction(action);
   }
