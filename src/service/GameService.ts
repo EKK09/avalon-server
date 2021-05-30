@@ -393,7 +393,6 @@ class GameService {
       this.declareTeam();
     } else if (this.step === 3) {
       // 宣告任務結果
-      this.declareTaskList();
       this.afterDeclareTaskResult();
     } else if (this.step === 4) {
       // 指派湖中女神
@@ -553,6 +552,7 @@ class GameService {
     }
 
     this.taskList.push(this.taskResult);
+    this.declareTaskList();
     this.resetVoteResultList();
     await this.incrementGameStep();
   }
