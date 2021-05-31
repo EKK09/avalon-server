@@ -36,6 +36,10 @@ export interface VoteResult {
   player: string
   result: boolean;
 }
+export interface TaskResult {
+  result: boolean;
+  failCount: number;
+}
 
 export interface GameResult {
   result: boolean;
@@ -100,7 +104,7 @@ export interface approveAction {
 }
 export interface DeclareTaskResultAction {
   type: GameActionType.DECLARE_TASK_RESULT;
-  payload: VoteResult[];
+  payload: TaskResult;
 }
 export interface GameStartAction {
   type: GameActionType.START;

@@ -29,6 +29,7 @@ import {
   DeclareAssassinAction,
   DeclareKillResultAction,
   GameResult,
+  TaskResult,
 } from './gameAction';
 
 interface Player {
@@ -557,7 +558,7 @@ class GameService {
     }
 
     this.taskList.push(this.taskResult);
-    this.declareTaskList();
+    this.declareTaskResult();
     this.resetVoteResultList();
     await this.incrementGameStep();
   }
@@ -578,15 +579,20 @@ class GameService {
     this.declareUnApprovalCount();
   }
 
-  declareResult() {
-    this.declareVoteResultList();
+  declareTaskResult() {
+    this.declareVoteResult();
     this.declareTaskList();
   }
 
-  declareVoteResultList(): void {
+  declareVoteResult(): void {
+    const failCount = this.voteResultList.filter((vote) => !vote.result).length;
+    const payload: TaskResult = {
+      result: this.taskResult,
+      failCount,
+    };
     const action: DeclareTaskResultAction = {
       type: GameActionType.DECLARE_TASK_RESULT,
-      payload: this.voteResultList,
+      payload,
     };
 
     this.broadcastAction(action);
