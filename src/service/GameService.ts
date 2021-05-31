@@ -155,38 +155,39 @@ class GameService {
   }
 
   private get getTeamSize(): number {
-    const { round, playerCount } = this;
-    if (round === 1) {
+    const { playerCount } = this;
+    const voteRound = this.taskList.length + 1;
+    if (voteRound === 1) {
       return playerCount < 8 ? 2 : 3;
     }
-    if (round === 2) {
+    if (voteRound === 2) {
       return playerCount < 8 ? 3 : 4;
     }
-    if (round === 3 && playerCount === 5) {
+    if (voteRound === 3 && playerCount === 5) {
       return 2;
     }
-    if (round === 3 && playerCount === 7) {
+    if (voteRound === 3 && playerCount === 7) {
       return 3;
     }
-    if (round === 3) {
+    if (voteRound === 3) {
       return 4;
     }
-    if (round === 4 && (playerCount === 5 || playerCount === 6)) {
+    if (voteRound === 4 && (playerCount === 5 || playerCount === 6)) {
       return 3;
     }
-    if (round === 4 && playerCount === 7) {
+    if (voteRound === 4 && playerCount === 7) {
       return 4;
     }
-    if (round === 4) {
+    if (voteRound === 4) {
       return 5;
     }
-    if (round === 5 && playerCount === 5) {
+    if (voteRound === 5 && playerCount === 5) {
       return 3;
     }
-    if (round === 5 && (playerCount === 6 || playerCount === 7)) {
+    if (voteRound === 5 && (playerCount === 6 || playerCount === 7)) {
       return 4;
     }
-    if (round === 5) {
+    if (voteRound === 5) {
       return 5;
     }
     return 0;
