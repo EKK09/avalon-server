@@ -86,7 +86,8 @@ class GameService {
   }
 
   public get leader(): string {
-    return this.playerList[this.round - 1];
+    const index = (this.round - 1) % this.playerCount;
+    return this.playerList[index];
   }
 
   private get isVoteFinished(): boolean {
@@ -106,11 +107,15 @@ class GameService {
       }
     });
 
-    if (this.round === 4) {
-      return failCount < 2;
-    }
+    return failCount < this.failThreshold;
+  }
 
-    return failCount === 0;
+  private get failThreshold(): number {
+    const votedCount = this.taskList.length;
+    if (votedCount === 3) {
+      return 2;
+    }
+    return 1;
   }
 
   private get failCount(): number {
