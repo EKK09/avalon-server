@@ -143,6 +143,9 @@ class GameService {
     if (this.failCount >= 3) {
       return false;
     }
+    if (this.unApproveCount === 5) {
+      return false;
+    }
     return true;
   }
 
