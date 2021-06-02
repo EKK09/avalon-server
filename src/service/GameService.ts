@@ -68,6 +68,8 @@ class GameService {
 
   private round: number = 0;
 
+  private god: string = '';
+
   private teamMemberList: string[] = [];
 
   private revealedPlayerList: string[] = [];
@@ -84,6 +86,10 @@ class GameService {
 
   public get playerCount(): number {
     return Object.keys(this.player).length;
+  }
+
+  public get hasGod(): boolean {
+    return this.playerList.length > 7;
   }
 
   public get leader(): string {
@@ -242,7 +248,7 @@ class GameService {
       return;
     }
 
-    if (action.type === GameActionType.ASSIGN_REVEAL_PLAYER && this.isLeader(client) && !this.isRevealedPlayer(action.payload)) {
+    if (action.type === GameActionType.ASSIGN_REVEAL_PLAYER && this.isGod(player) && !this.isRevealedPlayer(action.payload)) {
       const revealablePlayer = action.payload;
       this.revealedPlayerList.push(revealablePlayer);
       this.declareRevealedPlayerList();
@@ -256,6 +262,7 @@ class GameService {
         },
       };
       client.send(JSON.stringify(revealAction));
+      this.god = revealablePlayer;
       return;
     }
 
@@ -328,6 +335,10 @@ class GameService {
     return this.player[this.leader] === client;
   }
 
+  public isGod(player: string): boolean {
+    return this.god === player;
+  }
+
   public isTeamMember(client: WebSocket): boolean {
     return this.teamMemberList.some((player) => this.player[player] === client);
   }
@@ -369,6 +380,10 @@ class GameService {
     await this.setGameRole();
     this.declareGameRole();
     this.revealGameRole();
+    if (this.hasGod) {
+      const god = this.playerList[1];
+      this.god = god;
+    }
   }
 
   private async resetGameStep(): Promise<void> {
@@ -413,7 +428,8 @@ class GameService {
   }
 
   private afterDeclareTaskResult(): void {
-    if (this.round > 1) {
+    const voteRound = this.taskList.length;
+    if (voteRound > 1 && voteRound < 5 && this.hasGod) {
       this.incrementGameStep();
     } else {
       this.resetGameStep();
@@ -667,7 +683,7 @@ class GameService {
   assignGod(): void {
     const action : AssignGodAction = {
       type: GameActionType.ASSIGN_GOD,
-      payload: this.leader,
+      payload: this.god,
     };
     this.broadcastAction(action);
   }
