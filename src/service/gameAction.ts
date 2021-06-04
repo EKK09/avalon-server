@@ -30,7 +30,9 @@ export enum GameActionType {
   DECLARE_GAME_RESULT = 'DECLARE_GAME_RESULT',
   DECLARE_ASSASSIN = 'DECLARE_ASSASSIN',
   DECLARE_KILL_RESULT = 'DECLARE_KILL_RESULT',
-  ASSIGN_KILL_PLAYER = 'ASSIGN_KILL_PLAYER'
+  ASSIGN_KILL_PLAYER = 'ASSIGN_KILL_PLAYER',
+  DECLARE_OFFLINE = 'DECLARE_OFFLINE',
+  DECLARE_PLAYER_RETURN = 'DECLARE_PLAYER_RETURN',
 }
 export interface VoteResult {
   player: string
@@ -180,6 +182,14 @@ export interface DeclareKillResultAction {
   type: GameActionType.DECLARE_KILL_RESULT;
   payload: boolean;
 }
+export interface DeclareOfflineAction {
+  type: GameActionType.DECLARE_OFFLINE;
+  payload: string;
+}
+export interface DeclarePlayerReturnAction {
+  type: GameActionType.DECLARE_PLAYER_RETURN;
+  payload: string;
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -188,6 +198,8 @@ export interface DeclareKillResultAction {
 
 export type GameAction =
 NoneAction |
+DeclareOfflineAction |
+DeclarePlayerReturnAction |
 AssignKillPlayerAction |
 DeclareAssassinAction |
 DeclareKillResultAction |

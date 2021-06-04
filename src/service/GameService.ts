@@ -30,6 +30,8 @@ import {
   DeclareKillResultAction,
   GameResult,
   TaskResult,
+  DeclareOfflineAction,
+  DeclarePlayerReturnAction,
 } from './gameAction';
 
 interface Player {
@@ -207,11 +209,26 @@ class GameService {
     this.player = {};
     this.webSocketServer = new WebSocket.Server({ noServer: true });
     this.webSocketServer.on('connection', (webSocket: WebSocket, name: string) => {
-      this.addPlayer(name, webSocket);
+      if (this.round === 0) {
+        this.addPlayer(name, webSocket);
+      } else {
+        this.player[name] = webSocket;
+        this.declarePlayerReturn(name);
+      }
       this.declarePlayer();
       webSocket.on('message', (data: string) => {
         this.handleMessage(data, webSocket);
         console.log(`message from WebSocket Client: ${data}`);
+      });
+      webSocket.on('close', () => {
+        console.log(`${name} close`);
+        if (this.round === 0) {
+          this.removePlayer(name);
+          this.declarePlayer();
+        } else {
+          delete this.player[name];
+          this.declareOfflinePlayer(name);
+        }
       });
     });
   }
@@ -377,6 +394,14 @@ class GameService {
     this.player[name] = webSocket;
     this.playerList.push(name);
     return true;
+  }
+
+  private removePlayer(name: string): void {
+    delete this.player[name];
+    const playerIndex = this.playerList.indexOf(name);
+    if (playerIndex !== -1) {
+      this.playerList.splice(playerIndex, 1);
+    }
   }
 
   private async startGame(): Promise<void> {
@@ -724,6 +749,22 @@ class GameService {
     const action: DeclareKillResultAction = {
       type: GameActionType.DECLARE_KILL_RESULT,
       payload: result,
+    };
+    this.broadcastAction(action);
+  }
+
+  declareOfflinePlayer(player: string) {
+    const action: DeclareOfflineAction = {
+      type: GameActionType.DECLARE_OFFLINE,
+      payload: player,
+    };
+    this.broadcastAction(action);
+  }
+
+  declarePlayerReturn(player: string) {
+    const action: DeclarePlayerReturnAction = {
+      type: GameActionType.DECLARE_PLAYER_RETURN,
+      payload: player,
     };
     this.broadcastAction(action);
   }
