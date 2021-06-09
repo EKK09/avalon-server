@@ -19,13 +19,15 @@ class WebSocketService {
       if (!request.url) {
         throw new Error();
       }
-      const pathRex = /^\/(\w+)\/(\w+)/;
-      const matcher = request.url.match(pathRex);
 
-      if (matcher === null) {
+      let [, roomId, player] = request.url.split('/');
+      roomId = decodeURIComponent(roomId);
+      player = decodeURIComponent(player);
+
+      if (!roomId || !player) {
         throw new Error();
       }
-      const [, roomId, player] = matcher;
+
       const gameServices = WebSocketService.gameServiceList;
       for (let index = 0; index < gameServices.length; index += 1) {
         const service = gameServices[index];
