@@ -33,6 +33,7 @@ export enum GameActionType {
   ASSIGN_KILL_PLAYER = 'ASSIGN_KILL_PLAYER',
   DECLARE_OFFLINE = 'DECLARE_OFFLINE',
   DECLARE_PLAYER_RETURN = 'DECLARE_PLAYER_RETURN',
+  DECLARE_GAME_INFO = 'DECLARE_GAME_INFO',
 }
 export interface VoteResult {
   player: string
@@ -190,6 +191,24 @@ export interface DeclarePlayerReturnAction {
   type: GameActionType.DECLARE_PLAYER_RETURN;
   payload: string;
 }
+export interface GameInfo {
+  role: string;
+  leader: string;
+  teamSize: number;
+  playerList: string[];
+  merlins: string[];
+  evils: string[];
+  taskList: boolean[];
+  unApproveCount: number;
+  teamMemberList: string[];
+  revealedPlayerList: string[];
+  isRevealedPlayerGood: boolean | undefined;
+  status: string;
+}
+export interface DeclareGameInfoAction {
+  type: GameActionType.DECLARE_GAME_INFO;
+  payload: GameInfo;
+}
 
 // export interface GameAction {
 //   type: GameActionType;
@@ -198,6 +217,7 @@ export interface DeclarePlayerReturnAction {
 
 export type GameAction =
 NoneAction |
+  DeclareGameInfoAction |
 DeclareOfflineAction |
 DeclarePlayerReturnAction |
 AssignKillPlayerAction |

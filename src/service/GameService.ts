@@ -32,6 +32,7 @@ import {
   TaskResult,
   DeclareOfflineAction,
   DeclarePlayerReturnAction,
+  DeclareGameInfoAction,
 } from './gameAction';
 
 interface Player {
@@ -211,11 +212,12 @@ class GameService {
     this.webSocketServer.on('connection', (webSocket: WebSocket, name: string) => {
       if (this.round === 0) {
         this.addPlayer(name, webSocket);
+        this.declarePlayer();
       } else {
         this.player[name] = webSocket;
         this.declarePlayerReturn(name);
+        this.declareGameInfo(name);
       }
-      this.declarePlayer();
       webSocket.on('message', (data: string) => {
         this.handleMessage(data, webSocket);
         console.log(`message from WebSocket Client: ${data}`);
@@ -286,7 +288,7 @@ class GameService {
       return;
     }
 
-    if (action.type === GameActionType.ASSIGN_GOD_STATEMENT && this.isLeader(client) && action.payload) {
+    if (action.type === GameActionType.ASSIGN_GOD_STATEMENT && this.isGod(player) && action.payload) {
       this.declareGodStatement(action.payload);
       await this.resetGameStep();
       return;
@@ -313,6 +315,10 @@ class GameService {
   private isValidApprover(player: string): boolean {
     const approvedPlayers = this.approvalList.map((item) => item.player);
     return !approvedPlayers.includes(player);
+  }
+
+  private get hasAssignRevealPlayer(): boolean {
+    return this.taskList.length - 1 === this.revealedPlayerList.length;
   }
 
   static getActionFromMessage(message: string): GameAction {
@@ -767,6 +773,58 @@ class GameService {
       payload: player,
     };
     this.broadcastAction(action);
+  }
+
+  declareGameInfo(player: string) {
+    let merlins: string[] = [];
+    let evils: string[] = [];
+    let status: string = 'WAIT';
+    let isRevealedPlayerGood: boolean | undefined;
+    const role = this.role[player];
+
+    if (role === GameRoleName.MERLIN) {
+      evils = this.getRevealableEvilPlayers();
+    } else if (role === GameRoleName.PERCIVAL) {
+      merlins = this.getRevealableMerlinPlayers();
+    } else if (GameRoleService.isKnowEachOtherEvil(role)) {
+      evils = this.getKnowEachOtherEvilPlayers();
+    }
+
+    if (this.step === 1 && this.leader === player) {
+      status = 'SELECT_TASK_PLAYER';
+    } else if (this.step === 2 && this.isApproveFinished === false && this.isValidApprover(player)) {
+      status = 'APPROVE';
+    } else if (this.step === 2 && this.isApproveFinished && this.isValidVoter(player)) {
+      status = 'VOTE';
+    } else if (this.step === 4 && this.isGod(player) && this.hasAssignRevealPlayer === false) {
+      status = 'SELECT_REVEAL_PLAYER';
+    } else if (this.step === 4 && this.isGod(player) && this.hasAssignRevealPlayer) {
+      const lastRevealedPlayer = this.revealedPlayerList[this.revealedPlayerList.length - 1];
+
+      isRevealedPlayerGood = GameRoleService.isGood(this.role[lastRevealedPlayer]);
+      status = 'ASSIGN_GOD_STATEMENT';
+    } else if (this.step === 5 && this.ASSASSIN === player) {
+      status = 'SELECT_KILL_PLAYER';
+    }
+
+    const action: DeclareGameInfoAction = {
+      type: GameActionType.DECLARE_GAME_INFO,
+      payload: {
+        role: this.role[player],
+        leader: this.leader,
+        teamSize: this.getTeamSize,
+        playerList: this.playerList,
+        merlins,
+        evils,
+        taskList: this.taskList,
+        unApproveCount: this.unApproveCount,
+        teamMemberList: this.teamMemberList,
+        revealedPlayerList: this.revealedPlayerList,
+        isRevealedPlayerGood,
+        status,
+      },
+    };
+    this.player[player].send(JSON.stringify(action));
   }
 }
 
