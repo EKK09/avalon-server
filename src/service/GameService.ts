@@ -296,8 +296,8 @@ class GameService {
     if (action.type === GameActionType.ASSIGN_KILL_PLAYER && this.ASSASSIN === player && action.payload) {
       const killedPlayer = action.payload;
       this.isMerlinKilled = this.MERLIN === killedPlayer;
-      this.declareKillResult(this.isMerlinKilled);
-      this.handleStep();
+      this.declareKillResult();
+      this.incrementGameStep();
       return;
     }
 
@@ -379,6 +379,10 @@ class GameService {
 
   public resetVoteResultList(): void {
     this.voteResultList = [];
+  }
+
+  public resetTeamMemberList(): void {
+    this.teamMemberList = [];
   }
 
   public getPlayerByWebSocket(client: WebSocket): string {
@@ -608,9 +612,10 @@ class GameService {
       return;
     }
 
-    this.taskList.push(this.taskResult);
     this.declareTaskResult();
     this.resetVoteResultList();
+    this.resetTeamMemberList();
+    this.resetApproveList();
     await this.incrementGameStep();
   }
 
@@ -622,16 +627,18 @@ class GameService {
     this.declareApprovalResult();
     if (this.approveResult === false) {
       this.unApproveCount += 1;
+      this.resetTeamMemberList();
+      this.resetApproveList();
       this.resetGameStep();
     } else {
       this.unApproveCount = 0;
     }
-    this.resetApproveList();
     this.declareUnApprovalCount();
   }
 
   declareTaskResult() {
     this.declareVoteResult();
+    this.taskList.push(this.taskResult);
     this.declareTaskList();
   }
 
@@ -751,10 +758,10 @@ class GameService {
     this.broadcastAction(action);
   }
 
-  declareKillResult(result: boolean) {
+  declareKillResult() {
     const action: DeclareKillResultAction = {
       type: GameActionType.DECLARE_KILL_RESULT,
-      payload: result,
+      payload: this.isMerlinKilled,
     };
     this.broadcastAction(action);
   }
