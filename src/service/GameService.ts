@@ -34,6 +34,7 @@ import {
   DeclarePlayerReturnAction,
   DeclareGameInfoAction,
 } from './gameAction';
+import WebSocketService from './WebSocketService';
 
 interface Player {
   [key: string]: WebSocket;
@@ -138,6 +139,10 @@ class GameService {
     return successCount;
   }
 
+  private get onlinePlayerCount(): number {
+    return Object.keys(this.player).length;
+  }
+
   private get gameResult(): boolean {
     if (this.isMerlinKilled) {
       return false;
@@ -228,10 +233,24 @@ class GameService {
           this.removePlayer(name);
           this.declarePlayer();
         } else {
-          delete this.player[name];
           this.declareOfflinePlayer(name);
         }
+        delete this.player[name];
+        if (this.onlinePlayerCount === 0) {
+          this.closeGameService();
+        }
       });
+    });
+  }
+
+  private async closeGameService(): Promise<void> {
+    WebSocketService.removeService(this);
+    this.webSocketServer.close((err) => {
+      if (err) {
+        console.log('服務關閉出錯');
+      } else {
+        console.log('服務關閉成功');
+      }
     });
   }
 

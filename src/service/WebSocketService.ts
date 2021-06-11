@@ -10,7 +10,18 @@ class WebSocketService {
     const service = new GameService(name);
     const roomId = await service.createRoom();
     WebSocketService.gameServiceList.push(service);
+    console.log(`服務數量 ${WebSocketService.gameServiceList.length}`);
     return roomId;
+  }
+
+  static removeService(service: GameService) {
+    const services = WebSocketService.gameServiceList;
+    for (let index = 0; index < services.length; index += 1) {
+      if (service === services[index]) {
+        WebSocketService.gameServiceList.splice(index, 1);
+        return;
+      }
+    }
   }
 
   static handleGameConnection(request: IncomingMessage, socket: net.Socket, head: Buffer) {
