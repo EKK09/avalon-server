@@ -4,6 +4,7 @@ import GameRoomService from './service/gameRoomService';
 import UserModel from './model/userMode';
 import GameRoomModel from './model/gameRoomModel';
 import WebSocketService from './service/WebSocketService';
+import GameInfoModel, { GameInfo } from './model/gameInfoModel';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -29,6 +30,24 @@ app.post('/room', async (request: Request, response: Response) => {
     }
     const roomId = await WebSocketService.createGameService(playerName);
     response.json({ room_id: roomId });
+  } catch (error) {
+    response.status(500).json({ error_message: '內部錯誤' });
+  }
+});
+app.get('/game/:id', async (request: Request, response: Response) => {
+  try {
+    const roomId = request.params.id;
+    if (!roomId) {
+      response.status(404).json({ error_message: '找不到資料' });
+      return;
+    }
+    const gameInfo: GameInfo = await GameInfoModel.getGameInfo(roomId);
+    response.json({
+      player_info: gameInfo.playerInfo,
+      tasks: gameInfo.tasks,
+      killed: gameInfo.killed,
+      un_approve_count: gameInfo.unApproveCount,
+    });
   } catch (error) {
     response.status(500).json({ error_message: '內部錯誤' });
   }
