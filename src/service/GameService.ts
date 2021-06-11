@@ -35,6 +35,7 @@ import {
   DeclareGameInfoAction,
 } from './gameAction';
 import WebSocketService from './WebSocketService';
+import GameInfoModel from '../model/gameInfoModel';
 
 interface Player {
   [key: string]: WebSocket;
@@ -767,6 +768,12 @@ class GameService {
       payload: gameResult,
     };
     this.broadcastAction(action);
+    GameInfoModel.setGameInfo(this.roomId.toString(), {
+      playerInfo: this.role,
+      killed: this.isMerlinKilled,
+      tasks: this.taskList,
+      unApproveCount: this.unApproveCount,
+    });
   }
 
   declareAssassin() {
