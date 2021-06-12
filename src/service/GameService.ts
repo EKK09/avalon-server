@@ -457,7 +457,7 @@ class GameService {
 
     if (this.unApproveCount >= 5 || this.failCount >= 3 || this.isMerlinKilled) {
       this.step = 6;
-    } else if (this.successCount >= 3) {
+    } else if (this.successCount >= 3 && this.step < 5) {
       this.step = 5;
     }
 
