@@ -502,7 +502,6 @@ class GameService {
     Object.keys(this.player).forEach((player, index) => {
       this.role[player] = roles[index];
     });
-    await GameRoomModel.createGameRole(this.roomId.toString(), this.role);
   }
 
   private declareGameRole(): void {

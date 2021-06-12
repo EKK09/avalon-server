@@ -107,8 +107,8 @@ class GameRoomService {
     }
   }
 
-  static async createGameRoom(playerName: string): Promise<number> {
-    const roomId = await GameRoomModel.create(playerName);
+  static async createGameRoom(): Promise<number> {
+    const roomId = await GameRoomModel.create();
     const webSocketServer = new WebSocket.Server({ noServer: true });
     webSocketServer.path = roomId.toString();
     webSocketServer.on('connection', GameRoomService.handleConnection);
