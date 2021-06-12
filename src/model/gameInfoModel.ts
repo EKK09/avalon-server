@@ -66,17 +66,40 @@ class GameInfoModel {
     ]);
   }
 
-  static async getGameInfo(roomId: string): Promise<GameInfo> {
-    const playerInfo = await GameInfoModel.getPlayerInfo(roomId);
-    const tasks = await GameInfoModel.getTaskList(roomId);
-    const unApproveCount = await GameInfoModel.getUnApproveCount(roomId);
-    const killed = await GameInfoModel.getIsMerlinKilled(roomId);
-    return {
-      playerInfo,
-      tasks,
-      unApproveCount,
-      killed,
-    };
+  static async getGameInfo(roomId: string): Promise<GameInfo | null | false> {
+    try {
+      const response = await GameInfoModel.redis.multi()
+        .get(`game_killed:${roomId}`)
+        .get(`game_unapprove:${roomId}`)
+        .hgetall(`game_player_info:${roomId}`)
+        .lrange(`game_task:${roomId}`, 0, -1)
+        .exec();
+
+      // console.log(response);
+      if (response[0][0] || response[1][0] || response[2][0] || response[3][0]) {
+        throw new Error();
+      }
+      if (response[0][1] === null
+        || response[1][1] === null
+        || response[2][1] === null
+        || response[3][1] === null) {
+        return null;
+      }
+
+      const killed = Boolean(Number(response[0][1]));
+      const unApproveCount = Number(response[1][1]);
+      const playerInfo = response[2][1];
+      const tasks = response[3][1].map((string: string) => (string === '1'));
+      return {
+        playerInfo,
+        tasks,
+        unApproveCount,
+        killed,
+      };
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 }
 
