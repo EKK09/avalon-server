@@ -58,12 +58,14 @@ class GameInfoModel {
   }
 
   static async setGameInfo(roomId: string, gameInfo: GameInfo): Promise<void> {
-    await Promise.all([
-      GameInfoModel.setPlayerInfo(roomId, gameInfo.playerInfo),
-      GameInfoModel.setTaskList(roomId, gameInfo.tasks),
-      GameInfoModel.setUnApproveCount(roomId, gameInfo.unApproveCount),
-      GameInfoModel.setIsMerlinKilled(roomId, gameInfo.killed),
-    ]);
+    const res = await GameInfoModel.redis.pipeline()
+      .set(`game_killed:${roomId}`, gameInfo.killed ? '1' : '0')
+      .set(`game_unapprove:${roomId}`, gameInfo.unApproveCount)
+      .hmset(`game_player_info:${roomId}`, gameInfo.playerInfo)
+      .lpush(`game_task:${roomId}`, gameInfo.tasks.map((task) => (task ? '1' : '0')))
+      .exec();
+
+    console.log(res);
   }
 
   static async getGameInfo(roomId: string): Promise<GameInfo | null | false> {
