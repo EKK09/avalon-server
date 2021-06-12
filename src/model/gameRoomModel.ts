@@ -48,9 +48,8 @@ class GameRoomModel {
     return Number(res);
   }
 
-  static async create(playerName: string): Promise<number> {
+  static async create(): Promise<number> {
     const roomId = await GameRoomModel.redis.incr('next_room_id');
-    await GameRoomModel.redis.sadd(`game_room:${roomId}`, [playerName]);
     return roomId;
   }
 }

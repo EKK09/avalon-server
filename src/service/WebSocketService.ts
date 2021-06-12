@@ -6,8 +6,8 @@ import GameService from './GameService';
 class WebSocketService {
   static gameServiceList: GameService[] = [];
 
-  static async createGameService(name: string) {
-    const service = new GameService(name);
+  static async createGameService() {
+    const service = new GameService();
     const roomId = await service.createRoom();
     WebSocketService.gameServiceList.push(service);
     console.log(`服務數量 ${WebSocketService.gameServiceList.length}`);

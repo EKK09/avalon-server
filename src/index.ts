@@ -28,7 +28,7 @@ app.post('/room', async (request: Request, response: Response) => {
       response.status(400).json({ error_message: '參數錯誤' });
       return;
     }
-    const roomId = await WebSocketService.createGameService(playerName);
+    const roomId = await WebSocketService.createGameService();
     response.json({ room_id: roomId });
   } catch (error) {
     response.status(500).json({ error_message: '內部錯誤' });

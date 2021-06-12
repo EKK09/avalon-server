@@ -45,8 +45,6 @@ export interface GameRole {
 }
 
 class GameService {
-  public host: string = '';
-
   public roomId: number = 0;
 
   public webSocketServer: WebSocket.Server;
@@ -211,8 +209,7 @@ class GameService {
     return 0;
   }
 
-  constructor(host: string) {
-    this.host = host;
+  constructor() {
     this.player = {};
     this.webSocketServer = new WebSocket.Server({ noServer: true });
     this.webSocketServer.on('connection', (webSocket: WebSocket, name: string) => {
@@ -259,7 +256,7 @@ class GameService {
     const action: GameAction = GameService.getActionFromMessage(message);
     const player = this.getPlayerByWebSocket(client);
     console.log(action);
-    if (action.type === GameActionType.START && this.isHost(client) && this.round === 0) {
+    if (action.type === GameActionType.START && this.isHost(player) && this.round === 0) {
       await this.startGame();
       await this.incrementGameStep();
       return;
@@ -373,8 +370,8 @@ class GameService {
     return name in this.player;
   }
 
-  public isHost(client: WebSocket): boolean {
-    return this.player[this.host] === client;
+  public isHost(name: string): boolean {
+    return this.playerList[0] === name;
   }
 
   public isLeader(client: WebSocket): boolean {
@@ -495,7 +492,7 @@ class GameService {
   }
 
   async createRoom(): Promise<number> {
-    const roomId = await GameRoomModel.create(this.host);
+    const roomId = await GameRoomModel.create();
     this.roomId = roomId;
     return this.roomId;
   }
