@@ -301,12 +301,12 @@ class GameService {
         },
       };
       client.send(JSON.stringify(revealAction));
-      this.god = revealablePlayer;
       return;
     }
 
     if (action.type === GameActionType.ASSIGN_GOD_STATEMENT && this.isGod(player) && action.payload) {
       this.declareGodStatement(action.payload);
+      this.god = this.revealedPlayerList[this.revealedPlayerList.length - 1];
       await this.resetGameStep();
       return;
     }
