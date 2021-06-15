@@ -36,6 +36,7 @@ import {
 } from './gameAction';
 import WebSocketService from './WebSocketService';
 import GameInfoModel from '../model/gameInfoModel';
+import { setGameInfo } from '../model/AwsModel';
 
 interface Player {
   [key: string]: WebSocket;
@@ -764,7 +765,7 @@ class GameService {
       payload: gameResult,
     };
     this.broadcastAction(action);
-    GameInfoModel.setGameInfo(this.roomId.toString(), {
+    setGameInfo(this.roomId, {
       playerInfo: this.role,
       killed: this.isMerlinKilled,
       tasks: this.taskList,

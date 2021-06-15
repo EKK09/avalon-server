@@ -4,7 +4,7 @@ import GameRoomService from './service/gameRoomService';
 import UserModel from './model/userMode';
 import GameRoomModel from './model/gameRoomModel';
 import WebSocketService from './service/WebSocketService';
-import GameInfoModel from './model/gameInfoModel';
+import { getGameInfo } from './model/AwsModel';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -41,7 +41,7 @@ app.get('/game/:id', async (request: Request, response: Response) => {
       response.status(400).json({ error_message: '參數錯誤' });
       return;
     }
-    const gameInfo = await GameInfoModel.getGameInfo(roomId);
+    const gameInfo = await getGameInfo(Number(roomId));
     if (gameInfo === null) {
       response.status(404).json({ error_message: '找不到資料' });
       return;
