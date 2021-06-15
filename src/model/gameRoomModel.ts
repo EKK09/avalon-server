@@ -11,9 +11,14 @@ export interface PlayerRolePayload {
 }
 
 class GameRoomModel {
-  static DB_PORT = process.env.REDIS_DB_PORT;
+  static DB_PORT = process.env.REDIS_DB_HOST;
 
-  static redis = new Redis(GameRoomModel.DB_PORT, { enableAutoPipelining: true });
+  static redis = new Redis({
+    host: process.env.REDIS_DB_HOST,
+    port: Number(process.env.REDIS_DB_PORT),
+    password: process.env.REDIS_DB_PASSWORD,
+    enableAutoPipelining: true,
+  });
 
   static async isPlayerExist(roomId: string, playerName: string): Promise<boolean> {
     const booleanResponse = await GameRoomModel.redis.sismember(`game_room:${roomId}`, playerName);

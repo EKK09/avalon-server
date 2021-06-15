@@ -17,7 +17,12 @@ export interface GameInfo {
 class GameInfoModel {
   static DB_PORT = process.env.REDIS_DB_PORT;
 
-  static redis = new Redis(GameInfoModel.DB_PORT, { enableAutoPipelining: true });
+  static redis = new Redis({
+    host: process.env.REDIS_DB_HOST,
+    port: Number(process.env.REDIS_DB_PORT),
+    password: process.env.REDIS_DB_PASSWORD,
+    enableAutoPipelining: true,
+  });
 
   static async setPlayerInfo(roomId: string, playerInfo: PlayerInfo): Promise<void> {
     await GameInfoModel.redis.hmset(`game_player_info:${roomId}`, playerInfo);
