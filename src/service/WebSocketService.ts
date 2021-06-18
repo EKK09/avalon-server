@@ -3,6 +3,11 @@ import { IncomingMessage } from 'http';
 import * as net from 'net';
 import GameService from './GameService';
 
+export enum ServiceJoinCode {
+  OK = 100,
+  GAME_NOT_EXIST = 99,
+  PLAYER_EXIST = 98
+}
 class WebSocketService {
   static gameServiceList: GameService[] = [];
 
@@ -54,6 +59,31 @@ class WebSocketService {
       console.log(error);
       socket.destroy();
     }
+  }
+
+  static getGameServiceByRoomId(roomId: number): GameService | null {
+    const services = WebSocketService.gameServiceList;
+    for (let index = 0; index < services.length; index += 1) {
+      const service = services[index];
+      if (service.roomId === roomId) {
+        return service;
+      }
+    }
+    return null;
+  }
+
+  static getGameServiceJoinableMessage(roomId: number, playerName: string): ServiceJoinCode {
+    const service = WebSocketService.getGameServiceByRoomId(roomId);
+
+    if (service === null) {
+      return ServiceJoinCode.GAME_NOT_EXIST;
+    }
+
+    if (service.playerList.includes(playerName)) {
+      return ServiceJoinCode.PLAYER_EXIST;
+    }
+
+    return ServiceJoinCode.OK;
   }
 }
 
