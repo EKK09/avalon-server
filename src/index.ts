@@ -57,6 +57,19 @@ app.get('/game/:id', async (request: Request, response: Response) => {
     response.status(500).json({ error_message: '內部錯誤' });
   }
 });
+app.get('/host/:id', async (request: Request, response: Response) => {
+  try {
+    const roomId = Number(request.params.id);
+    if (!roomId) {
+      response.status(400).json({ error_message: '參數錯誤' });
+      return;
+    }
+    const host = WebSocketService.getGameServiceHost(roomId);
+    response.json({ host });
+  } catch (error) {
+    response.status(500).json({ error_message: '內部錯誤' });
+  }
+});
 app.post('/join/:id', async (request: Request, response: Response) => {
   try {
     const roomId = Number(request.params.id);

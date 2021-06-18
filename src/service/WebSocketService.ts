@@ -85,6 +85,16 @@ class WebSocketService {
 
     return ServiceJoinCode.OK;
   }
+
+  static getGameServiceHost(roomId: number): string {
+    const service = WebSocketService.getGameServiceByRoomId(roomId);
+
+    if (service === null) {
+      return '';
+    }
+
+    return service.playerList[0];
+  }
 }
 
 export default WebSocketService;
