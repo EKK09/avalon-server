@@ -79,7 +79,7 @@ class WebSocketService {
       return ServiceJoinCode.GAME_NOT_EXIST;
     }
 
-    if (service.playerList.includes(playerName)) {
+    if (service.playerExist(playerName)) {
       return ServiceJoinCode.PLAYER_EXIST;
     }
 
