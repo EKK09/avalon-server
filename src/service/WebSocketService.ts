@@ -6,7 +6,9 @@ import GameService from './GameService';
 export enum ServiceJoinCode {
   OK = 100,
   GAME_NOT_EXIST = 99,
-  PLAYER_EXIST = 98
+  PLAYER_EXIST = 98,
+  GAME_HAS_START = 97,
+  NO_SPACE = 96
 }
 class WebSocketService {
   static gameServiceList: GameService[] = [];
@@ -43,17 +45,20 @@ class WebSocketService {
       if (!roomId || !player) {
         throw new Error();
       }
-
-      const gameServices = WebSocketService.gameServiceList;
-      for (let index = 0; index < gameServices.length; index += 1) {
-        const service = gameServices[index];
-        if (service.roomId.toString() === roomId && service.playerExist(player) === false) {
-          service.webSocketServer.handleUpgrade(request, socket, head, (client: WebSocket) => {
-            service.webSocketServer.emit('connection', client, player);
-          });
-          return;
-        }
+      const service = WebSocketService.getGameServiceByRoomId(Number(roomId));
+      if (service === null) {
+        throw new Error();
       }
+      const isValidNewConnection = service.gameStarted === false && service.playerExist(player) === false;
+      const isValidReconnection = service.gameStarted && service.playerExist(player) === false && service.playerList.includes(player);
+
+      if (isValidNewConnection || isValidReconnection) {
+        service.webSocketServer.handleUpgrade(request, socket, head, (client: WebSocket) => {
+          service.webSocketServer.emit('connection', client, player);
+        });
+        return;
+      }
+
       socket.destroy();
     } catch (error) {
       console.log(error);
@@ -81,6 +86,17 @@ class WebSocketService {
 
     if (service.playerExist(playerName)) {
       return ServiceJoinCode.PLAYER_EXIST;
+    }
+
+    if (service.playerList.length >= 10) {
+      return ServiceJoinCode.NO_SPACE;
+    }
+
+    if (
+      service.gameStarted
+      && service.playerList.includes(playerName) === false
+    ) {
+      return ServiceJoinCode.GAME_HAS_START;
     }
 
     return ServiceJoinCode.OK;

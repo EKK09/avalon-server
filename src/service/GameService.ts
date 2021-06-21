@@ -87,6 +87,10 @@ class GameService {
 
   private isMerlinKilled: boolean = false;
 
+  public get gameStarted(): boolean {
+    return this.round > 0;
+  }
+
   public get playerCount(): number {
     return Object.keys(this.player).length;
   }
